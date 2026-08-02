@@ -1,0 +1,96 @@
+# Word lists behind the 29 engineered features in features.py. The feature *logic*
+# stays in code; only the vocabulary lives here, since that is what gets tuned.
+#
+# "no" is quoted throughout: YAML 1.1 reads a bare no as false, and Norway's TLD is no.
+
+# A bare host is accepted as a link only when its TLD is real. Without this every
+# missing space after a full stop ("see you tomorrow.We can...") counts as a link,
+# which put n_urls at 0.106 on ham that has essentially no links.
+known_tlds: [
+  com, net, org, edu, gov, mil, int, info, biz, name, pro,
+  io, co, me, tv, cc, ly, gl, gd, us, uk, ca, au, de,
+  fr, es, it, nl, se, "no", fi, dk, pl, ru, ua, cn, jp,
+  kr, in, sg, my, ph, id, th, vn, hk, tw, nz, za, br,
+  mx, ar, cl, pe, ie, pt, gr, cz, ro, hu, at, ch, be,
+  tr, il, ae, sa, ng, ke, gh, app, dev, page, xyz, top,
+  icu, buzz, click, link, vip, shop, online, site, store,
+  tech, space, website, fun, life, world, today, email, team,
+  tk, ml, ga, gq, rest, deals, monster, quest,
+  cyou, sbs, cfd, bond, surf, live, work, fit,
+]
+
+# TLDs over-represented in abuse relative to their size.
+suspicious_tlds: [
+  top, xyz, icu, buzz, click, link, vip, shop, online,
+  site, cc, tk, ml, ga, gq, rest, deals, monster, quest,
+  cyou, sbs, cfd, bond, surf, live, work, fit,
+]
+
+shorteners: [
+  bit.ly, tinyurl.com, goo.gl, t.co, ow.ly, is.gd, buff.ly,
+  cutt.ly, rebrand.ly, tiny.cc, rb.gy, shorturl.at, bit.do,
+  t.ly, s.id, clck.ru, shrtco.de, 1url.com, tr.im, urlz.fr,
+]
+
+# Brands checked for a domain mismatch: named in the body but absent from every link.
+mismatch_brands: [
+  usps, fedex, ups, dhl, amazon, netflix, apple, paypal,
+  medicare, irs, walmart, costco, chase, citi, wellsfargo,
+  bankofamerica, att, tmobile, verizon, coinbase, ezpass,
+]
+
+# Each family becomes two features: <family>_n (count) and <family>_hit (0/1).
+families:
+
+  money: [
+    gift card, giftcard, wire transfer, western union, money order,
+    bitcoin, btc, crypto, ethereum, zelle, venmo, cash app,
+    cashapp, prepaid card, paypal me, moneygram, steam card,
+    itunes card, google play card, wallet address,
+  ]
+
+  pressure: [
+    urgent, urgently, immediately, expires, expiring, expired,
+    suspended, suspension, final notice, last chance, act now,
+    within 24 hours, within 48 hours, 24 hrs, as soon as possible,
+    asap, will be closed, will be terminated, avoid penalty,
+    avoid suspension, limited time, right away, before it is too late,
+    failure to, must respond,
+  ]
+
+  credentials: [
+    verification code, verify your, confirm your identity, one-time code,
+    one time password, otp, your pin, pin number, password,
+    card number, cvv, social security, ssn, date of birth,
+    account number, log in, login, sign in, re-activate, reactivate,
+    update your details, confirm your account, security code,
+  ]
+
+  brands: [
+    usps, u.s. postal, united states postal, fedex, ups, dhl,
+    royal mail, canada post, medicare, medicaid, irs, i.r.s,
+    internal revenue, dmv, social security administration, e-zpass,
+    ezpass, sunpass, fastrak, toll, bank of america, wells fargo,
+    chase, citibank, citi, capital one, usaa, navy federal,
+    amazon, netflix, apple, paypal, walmart, costco, at&t,
+    t-mobile, verizon, coinbase, geek squad, norton, mcafee,
+  ]
+
+  # US marketing texts are legally required to carry these, so a hit was expected to
+  # be evidence *for* a legitimate advertisement. Measured, it points the other way:
+  # 3.2% of smishing carries it against 0.4% of ad spam. Scammers mimic it.
+  optout: [
+    reply stop, text stop, txt stop, reply help, text help,
+    to unsubscribe, unsubscribe, opt out, optout, stop to end,
+    stop2end, msg&data rates, message and data rates, std msg rates,
+    reply stop to cancel,
+  ]
+
+  # Openers that manufacture a relationship before the ask.
+  opener: [
+    hi grandma, hi grandpa, hey grandma, hello grandma, hi mom,
+    hi dad, is this still your number, sorry wrong number,
+    wrong number, hey it's me, long time no see, how are you doing,
+    do you remember me, "is this ", i got your number from,
+    are you free, new number, this is my new number,
+  ]

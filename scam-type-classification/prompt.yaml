@@ -1,0 +1,158 @@
+# Stage 2: name the scam type and the warning signs behind an already-flagged SMS.
+# The taxonomy itself lives in ../dataset/scam_types.yaml -- this file is the model,
+# the generation settings and the prompts.
+
+model:
+  name: Qwen/Qwen2.5-3B-Instruct
+  # fp16 is ~6.2 GB and will not fit alongside anything else on a 6 GB card, so the
+  # default is 4-bit. bitsandbytes NF4 has no int4 acceleration on Pascal -- it
+  # dequantizes per layer -- so a Q4_K_M GGUF through llama.cpp would be much faster
+  # if this ever has to run over more than a few hundred messages.
+  four_bit: true
+  quant_type: nf4
+  double_quant: true
+
+generation:
+  batch_size: 8
+  do_sample: false          # greedy: this is classification, not writing
+  max_new_tokens:
+    json: 160
+    explain: 120
+
+evaluate:
+  limit: 50
+  seed: 200
+  # scam_types.yaml routes these two categories to `other` because the taxonomy has
+  # no home for them -- 262 of the 360 `other` rows. Scoring against them measures the
+  # mapping, not the model: an ad-styled lure has no correct answer to find.
+  unscoreable_categories: [advertisement, loans/credit]
+
+# --- prompts ------------------------------------------------------------------
+# {placeholders} are filled in by scam_type_prompt.py.
+
+# One line per type plus a concrete example, because the type names alone are too
+# abstract to separate "bank alert" from "government impersonation" reliably. The
+# {type} names are substituted from the taxonomy, so renaming a type there renames it
+# here too.
+type_guide: |-
+  - {GOVERNMENT}: claims to be a tax, benefits, legal, police or motor-vehicle
+    authority. Threatens fines, warrants, suspended benefits or a court case.
+    e.g. "IRS FINAL NOTICE: a warrant is issued for your arrest. Call now to settle."
+  - {TECH_SUPPORT}: claims an account, device or subscription has a problem and
+    needs you to log in, call support, or pay to restore it. Any account alert from a
+    shop, streaming service, phone carrier, social network or tech company (Amazon,
+    Apple, Netflix, Facebook, T-Mobile) belongs here -- including when it mentions a
+    locked account, an unauthorised purchase or a payment. A charge being mentioned
+    does not make it {BANK}; the sender being a bank does.
+    e.g. "Your Netflix membership is on hold. Update your billing: netflx-billing.top"
+    e.g. "Your Amazon account is locked after an unauthorised $999 order. Verify now."
+  - {BANK}: claims to be your bank or a payment app about a transaction, a locked
+    card or suspicious activity. Only banks and payment apps (Wells Fargo, Chase,
+    PayPal, Venmo, Cash App) -- an Amazon or Apple account alert is {TECH_SUPPORT}.
+    e.g. "Wells Fargo: Did you authorise $482.19 to AMZN? Reply NO to dispute."
+  - {DELIVERY}: anything about a parcel, courier, customs charge or road toll -- held
+    packages, redelivery, an unpaid shipping or customs fee. Any unpaid fee owed to a
+    courier (USPS, UPS, FedEx, DHL) belongs here, not under utilities.
+    e.g. "USPS: your package is held, $0.35 customs fee due: usps-redeliver.icu"
+    e.g. "DHL: an outstanding import charge of $2.99 is blocking your shipment."
+  - {FAMILY}: pretends to be a relative in trouble and needing money now.
+    e.g. "Grandma it's me, I'm in jail and can't talk. Please send bail money."
+  - {ROMANCE}: a stranger opening a conversation -- a wrong number, a misremembered
+    name, "long time no see", a shared meal or golf game that never happened. There is
+    usually NO link, NO money request and nothing threatening in this first message;
+    that is what makes it this category rather than "other".
+    e.g. "Hi! Is this still Amy's number? I'm Lisa, we met at the yoga retreat :)"
+    e.g. "Hey Tom, ages since we caught up -- it's Mei. How have you been?"
+  - {CRYPTO}: promises trading profits, crypto giveaways or an investment tip.
+    e.g. "BTC signal group: our members made 340% last week. Join free."
+  - {PRIZE}: says you have won something, or are selected for a reward or gift card.
+    e.g. "CONGRATS! You have been selected for a $500 Costco gift card. Claim here."
+  - {CHARITY}: asks for a donation, often tied to a disaster or a veterans' cause.
+    e.g. "Help the hurricane relief fund - any amount helps. Donate: give-relief.xyz"
+  - {HEALTH}: Medicare, insurance, prescriptions, braces, test kits or medical
+    devices, usually "free" and needing your details.
+    e.g. "New Medicare benefit: free back brace approved. Confirm your ID to ship."
+  - {UTILITY}: threatens to cut off power, water, gas or internet over an unpaid bill.
+    Only household utilities -- a courier's unpaid fee is {DELIVERY}.
+    e.g. "FINAL WARNING: your electricity will be disconnected today. Pay now."
+  - {JOB}: offers easy remote work, high pay for little effort, or a hiring interview
+    you never applied for.
+    e.g. "We reviewed your resume. $35/hr remote data entry, start today. Text YES."
+  - {OTHER}: a suspicious message that does not fit any type above.
+
+# --- method: choice (default) -------------------------------------------------
+# Letting the model write the category out in full does not work at this size. On the
+# 1,055-message evaluation it answered "utility shutoff" 261 times against one true
+# example, then wrote an explanation to match ("threat of power cut over an unpaid
+# bill" for a photo-gallery lure). Identical at batch 1 and batch 8, so it is the
+# model, not padding. Scoring the taxonomy instead of generating it removes the
+# failure by construction: one forward pass, argmax over the 13 option letters.
+choice_letters: ABCDEFGHIJKLM
+
+choice_system: |-
+  You classify suspicious SMS messages for an app that protects older adults.
+
+  Every message you are given has ALREADY been flagged as suspicious by an earlier
+  filter. Do not re-judge whether it is a scam -- decide which KIND of scam it is. A
+  message that reads as harmless small talk is not "other": scams that open with a
+  friendly stranger, a wrong number or a golf/dinner memory are the first move of a
+  romance scam, and the ask comes in a later message you cannot see.
+
+  Answer with the single letter of the best category and nothing else.
+
+choice_user: |-
+  Categories:
+  {guide}
+
+  Options:
+  {menu}
+
+  Message:
+  """{message}"""
+
+  Answer with one letter:
+
+explain_user: |-
+  Message:
+  """{message}"""
+
+  An earlier filter flagged this message as suspicious, and it has been categorised
+  as: {scam_type}. Do not question that category.
+
+  List the concrete warning signs visible in the text and write one short
+  plain-English sentence an older adult could act on. Never tell the user to click a
+  link or reply to the sender.
+
+  Reply with a single JSON object and nothing else:
+  {{"warning_signs": [<short phrases, 1 to 4 of them>],
+   "explanation": <one sentence, under 25 words>}}
+
+# --- method: json (kept for comparison) ---------------------------------------
+json_system: |-
+  You classify suspicious SMS messages for an app that protects older adults.
+
+  Every message you are given has ALREADY been flagged as suspicious by an earlier
+  filter. Do not re-judge whether it is a scam -- decide which KIND of scam it is. A
+  message that reads as harmless small talk is not "other": scams that open with a
+  friendly stranger, a wrong number or a golf/dinner memory are the first move of a
+  romance scam, and the ask comes in a later message you cannot see. Only use "other"
+  when the message genuinely fits none of the categories.
+
+  Given one message, identify which scam category it belongs to, list the concrete
+  warning signs visible in the text, and write one short plain-English sentence an older
+  adult could act on. Never tell the user to click a link or reply to the sender.
+
+  Reply with a single JSON object and nothing else:
+  {{"scam_type": <one of the categories, copied exactly>,
+   "warning_signs": [<short phrases, 1 to 4 of them>],
+   "explanation": <one sentence, under 25 words>,
+   "confidence": <number between 0 and 1>}}
+
+json_user: |-
+  Categories:
+  {guide}
+
+  Message:
+  """{message}"""
+
+  JSON:

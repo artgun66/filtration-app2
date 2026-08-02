@@ -1,0 +1,87 @@
+# The 13 scam types from Cyber-Scout-Analysis-Plan.docx, and how SmishTank's 10
+# curated categories map onto them. The plan assumed hand-labelling; SmishTank already
+# ships categorised messages, so most of the work is this mapping.
+
+scam_types:
+  - government impersonation
+  - tech support
+  - bank alert
+  - delivery and toll
+  - family emergency
+  - romance
+  - investment and crypto
+  - prize and lottery
+  - charity
+  - Medicare and health
+  - utility shutoff
+  - job offer
+  - other
+
+# Types SmishTank cannot supply. Measured by running scam_types.py, not guessed:
+# these come out at 0 rows, so stage 2 cannot be scored on them until hand-labelled.
+uncovered: [family emergency, charity, Medicare and health]
+thin: [utility shutoff]        # 1 row
+
+# Categories that decide the type on their own.
+category_map:
+  prize/contest: prize and lottery
+  delivery: delivery and toll
+  wrong number/romance scam: romance
+  finance/crypto: investment and crypto
+  job advertisement: job offer
+  lawsuits/settlements: government impersonation   # a fake court notice impersonates authority
+  loans/credit: other            # no loan-offer type; 4 rows, not worth a 14th
+  # SmishTank is a curated *smishing* collection, so "Advertisement" means an
+  # ad-styled lure (Dr Oz endorsements, fake retail offers), not real marketing.
+  advertisement: other
+
+# Categories where the category says nothing about who is impersonated, so the brand
+# decides instead.
+brand_decides: [account alert, other]
+
+# Brand -> type. Keys are normalised on load: lowercased, alphanumerics only.
+brands:
+
+  government impersonation: [
+    irs, edd, uionline, hmrc, icac, army, marinecorps,
+    unitedstatesofficialarmydraft, canotify, ebt, ebtcard,
+    usspeaks, dmv, ssa, socialsecurity,
+  ]
+
+  bank alert: [
+    bankofamerica, citi, citizenbank, citizensbank, wellsfargo,
+    wells, navyfederal, navyfcu, navyfed, navyfederalcu, chase,
+    chasebank, chasemorgan, jpmorgan, paypal, charlesschwab,
+    visa, discovercard, venmo, wepay, usaa, rbc, cibc, td,
+    aib, pnc, comerica, regionsbank, unionbank, usbank,
+    bankofthewest, alturacreditunion, alaskausa, americanexpress,
+    square, cashapp, cashrequestonline, interac, onpoint,
+    rbank, ozow, capitalone, por,
+  ]
+
+  tech support: [
+    amazon, amazoninc, netflix, apple, iphone, ipadpro,
+    whatsapp, line, tmobile, tmob, att, verizon, snapchat,
+    facebook, instagram, twitter, ebay, gamestop, hp,
+    comcastinc, ee, telcel, clarovideo, steamcarddelivery,
+    google, microsoft, claro,
+  ]
+
+  investment and crypto: [
+    bitcoin, bitcoinofamerica, coinbase, coincircle, metamask, blackrock,
+  ]
+
+  delivery and toll: [
+    usps, uspostal, uspostalservice, usp, ups, fedex, dhl,
+    canadapost, anpost, royalmail, deutschepost, aftership,
+    ezpass, sunpass, fastrak,
+  ]
+
+  Medicare and health: [
+    cvs, walgreens, medicare, who, jj, aca,
+    firstchoicecommunityhealthcare,
+  ]
+
+  charity: [unicef, gofundme, givingli]
+  utility shutoff: [flexalert]
+  job offer: [indeed, tcwglobal, cieestudyabroad, pruittgroup]

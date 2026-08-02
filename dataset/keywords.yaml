@@ -1,0 +1,47 @@
+# The keyword rule scored as arm 1 in scam-classification/run_arms.py, and written
+# into the dataset as one 0/1 column per term (kw_http ... kw_sign_in).
+#
+# Matching is a literal lowercase substring test -- not word-boundary aware. "won"
+# fires inside "town", "irs" inside "first". That is deliberate: arm 1 is the sanity
+# floor and a stand-in for whatever rule produced Smishing_Dataset's labels, so it is
+# scored the way such a rule really behaves. Changing this changes arm 1's numbers.
+
+keywords:
+  - http
+  - www.
+  - click
+  - link
+  - verify
+  - verification
+  - account
+  - suspend
+  - locked
+  - urgent
+  - immediately
+  - expire
+  - confirm
+  - update your
+  - won
+  - winner
+  - prize
+  - free
+  - claim
+  - cash
+  - gift card
+  - bank
+  - card number
+  - ssn
+  - social security
+  - package
+  - delivery
+  - usps
+  - fedex
+  - irs
+  - toll
+  - payment
+  - refund
+  - bitcoin
+  - crypto
+  - password
+  - login
+  - sign in

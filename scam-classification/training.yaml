@@ -1,0 +1,83 @@
+# Stage 1: safe vs suspicious. Everything tunable about the split, the arms and the
+# search lives here; the logic lives in modeling.py and run_arms.py.
+
+seed: 200          # splits, LightGBM, Optuna and the bootstrap all take this
+
+split:
+  n_folds: 5       # StratifiedGroupKFold; fold 0 -> test, fold 1 -> val, rest -> train
+  group_column: dup_group        # never split a near-duplicate template across sides
+  clean_column: is_clean_label   # val/test use only groups where every row is clean
+
+threshold:
+  # Highest threshold whose validation recall still clears this floor, then applied to
+  # test unchanged. Measured: fitting to 0.95 on validation lands below it on test
+  # about half the time; 0.97 is what actually delivers 0.95 on test.
+  min_recall: 0.95
+
+# The seven arms, in the order the plan lists them. Only the representation varies.
+arms: [keyword, tfidf, minilm, qwen, qwen_feat, ann, qwen_feat_clean]
+
+# Arms whose fitted model can be replayed on new rows by annotate.py. keyword has no
+# model; ann is not pickled; tfidf's pickle holds the classifier but not the
+# vectorizer, so its feature space cannot be rebuilt from disk.
+replayable: [qwen_feat_clean, qwen_feat, qwen, minilm]
+
+default_arm: qwen_feat_clean     # what annotate.py writes into model_pred
+
+encoders:
+  qwen: Qwen/Qwen3-Embedding-0.6B
+  qwen4b: Qwen/Qwen3-Embedding-4B     # will not fit 6 GB in fp16; here for completeness
+  minilm: sentence-transformers/all-MiniLM-L6-v2
+
+embedding:
+  # Qwen3-Embedding advertises 32k context and encode() sorts by length, so the final
+  # batches hold the longest messages and OOM a 6 GB card. The corpus is p99 = 320
+  # *characters*, so capping at 256 tokens truncates nothing real.
+  max_seq_len: 256
+  batch_size: 64
+
+tfidf:
+  max_features: 5000
+  min_df: 3
+  ngram_range: [1, 2]
+  sublinear_tf: true
+  strip_accents: unicode
+
+# Bayesian search over LightGBM, scored by validation AUC. 20 + 30 = 50 fits per arm.
+bayes_opt:
+  init_points: 20
+  n_iter: 30
+  smoke: 2          # --smoke uses this for both, to check the pipeline runs
+
+lightgbm:
+  n_jobs: 6         # physical cores on the target box
+  bounds:
+    max_depth: [1, 10]
+    num_leaves: [2, 64]
+    learning_rate: [0.01, 0.4]
+    max_bin: [50, 800]
+    colsample_bytree: [0.01, 1.0]
+    reg_alpha: [1, 10]
+    reg_lambda: [0.01, 1]
+    subsample: [0.01, 1]
+    min_child_samples: [30, 100]
+    min_child_weight: [1, 5]
+    n_estimators: [100, 1000]
+    scale_pos_weight: [1, 4]
+  int_params: [max_depth, num_leaves, max_bin, min_child_samples, n_estimators]
+
+# Arm 6: MLP on Qwen embeddings, tuned with Optuna TPE.
+ann:
+  epochs: 30
+  batch_size: 1024
+  search:
+    hidden: [128, 256, 512]
+    depth: [1, 3]
+    dropout: [0.0, 0.5]
+    lr: [0.0001, 0.005]     # sampled log-uniform
+
+bootstrap:
+  n: 1000          # resamples for the recall confidence interval
+
+# Arm 1: the keyword rule is the sanity floor. Its terms live in
+# ../dataset/keywords.yaml, because the dataset carries one column per term.

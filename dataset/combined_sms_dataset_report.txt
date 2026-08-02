@@ -1,0 +1,95 @@
+Combined SMS / smishing dataset
+============================================================
+
+Rows read per source (after dropping blanks / bad labels):
+  SmishTank                  1,062   kept after dedupe:  1,055
+    https://smishtank.com
+  Smishing_Dataset          84,863   kept after dedupe: 73,012
+    https://github.com/shaghayegh-hp/Smishing_Dataset
+  NUS SMS Corpus            55,835   kept after dedupe: 13,782
+    https://github.com/kite1988/nus-sms-corpus
+  Mendeley SMS Phishing      5,971   kept after dedupe:    621
+    https://data.mendeley.com/datasets/f45bkkt8pr/1
+  UCI SMS Spam Collection    5,574   kept after dedupe:     72
+    https://archive.ics.uci.edu/dataset/228/sms+spam+collection
+  ! resolved:spam_smishing_unknown: 111
+
+Total rows read      : 153,305
+Exact-text duplicates: 64,763
+Final unique rows    : 88,542
+
+scam            1 (spam or smishing) :  29,653
+scam            0 (ham)              :  58,889
+spam_label      1 (spam, not smish)  :   6,623
+smishing_label  1 (smishing)         :  23,030
+  scam == spam_label + smishing_label: True
+
+label  ham                 :  58,889
+label  spam                :   6,623
+label  smishing            :  23,030
+
+Clean-labelled rows      :  52,058   (val/test are drawn from these)
+Keyword-labelled rows    :  36,484   (train only)
+
+Near-duplicate groups    :  83,473   (split on these, not on rows)
+  rows collapsed by them :   5,069
+  largest group          :      28 rows
+
+Rows with a scam_type    :   1,055
+    government impersonation      85
+    tech support                 102
+    bank alert                   116
+    delivery and toll            180
+    romance                       65
+    investment and crypto         64
+    prize and lottery             57
+    utility shutoff                1
+    job offer                     25
+    other                        360
+  no examples yet: family emergency, charity, Medicare and health
+
+Rows with a URL          : 8,758
+Rows with a date         : 1,055
+Cross-source duplicates  : 37,996
+Conflicting scam labels  : 85
+
+Keyword columns (38), rows matched and how they split by label:
+  column                  rows     ham   spam  smish   lift
+  kw_http                9,871      46  1,813  8,012   2.97
+  kw_www                 1,044      80    196    768   2.76
+  kw_click               3,667      45     30  3,592   2.95
+  kw_link                2,551      87     70  2,394   2.88
+  kw_verify                565       8      3    554   2.94
+  kw_verification          347       5      9    333   2.94
+  kw_account             2,786     171     12  2,603   2.80
+  kw_suspend               648       4     28    616   2.97
+  kw_locked                406      23      1    382   2.82
+  kw_urgent                521      94     35    392   2.45
+  kw_immediately           922      29     32    861   2.89
+  kw_expire                919      36     59    824   2.87
+  kw_confirm               988     302     24    662   2.07
+  kw_update_your         1,014       7     73    934   2.97
+  kw_won                 1,255     751     16    488   1.20
+  kw_winner                296      14      6    276   2.84
+  kw_prize                 641      19     12    610   2.90
+  kw_free                5,964   1,059    175  4,730   2.46
+  kw_claim                 882      20     18    844   2.92
+  kw_cash                2,360     139    674  1,547   2.81
+  kw_gift_card              54       2     11     41   2.88
+  kw_bank                2,471     287    276  1,908   2.64
+  kw_card_number           234       3      2    229   2.95
+  kw_ssn                    47      15      8     24   2.03
+  kw_social_security         2       1      0      1   1.49
+  kw_package               480      27    115    338   2.82
+  kw_delivery              814      17    163    634   2.92
+  kw_usps                  108       1      0    107   2.96
+  kw_fedex                  23       1      0     22   2.86
+  kw_irs                 1,741   1,039    146    556   1.20
+  kw_toll                  568      10     29    529   2.93
+  kw_payment             1,005      38     25    942   2.87
+  kw_refund                389       7     11    371   2.93
+  kw_bitcoin                33       0      0     33   2.99
+  kw_crypto                 28       0      3     25   2.99
+  kw_password              166      48      3    115   2.12
+  kw_login                 588      25      9    554   2.86
+  kw_sign_in                42       5      5     32   2.63

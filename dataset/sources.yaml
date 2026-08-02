@@ -1,0 +1,76 @@
+# The five SMS / smishing datasets, named as Cyber-Scout-Analysis-Plan.docx names them.
+#
+# `link`   goes into the dataset's source_link column.
+# `raw`    is where the source lands under raw/, named after the dataset rather than
+#          after whatever the publisher called the file inside the archive.
+# `from`   is how to get it out of archives/: a zip member, a zip inside a zip, or a
+#          loose file to copy.
+# `label_priority` decides whose label wins when the same text appears in several
+#          sources; `field_priority` decides whose enrichment columns are carried.
+#          Lower wins. They differ on purpose -- Smishing_Dataset has rich fields but
+#          keyword-assigned labels.
+# `leaky: true` marks a source whose labels were machine-assigned. Its rows get
+#          is_clean_label = 0 and never reach validation or test.
+
+sources:
+  SmishTank:
+    link: https://smishtank.com
+    raw: SmishTank/SmishTank.csv
+    from:
+      type: file
+      path: analysisdataset.csv
+    label_priority: 0    # hand-curated smishing screenshots
+    field_priority: 0    # richest: URL / WHOIS / brand enrichment
+
+  Smishing_Dataset:
+    link: https://github.com/shaghayegh-hp/Smishing_Dataset
+    raw: Smishing_Dataset/Smishing_Dataset.csv
+    from:
+      type: zip
+      archive: Smishing_Dataset-main.zip
+      member: Smishing_Dataset-main/Combined-Labeled-Dataset.csv
+    label_priority: 4    # keyword-assigned -- see the repo's own README
+    field_priority: 1
+    leaky: true
+
+  NUS SMS Corpus:
+    link: https://github.com/kite1988/nus-sms-corpus
+    raw: NUS_SMS_Corpus/NUS_SMS_Corpus.json
+    from:
+      type: zip
+      archive: archive.zip
+      member: smsCorpus_en_2015.03.09_all.json
+    label_priority: 3    # all legitimate by construction
+    field_priority: 4
+
+  Mendeley SMS Phishing:
+    link: https://data.mendeley.com/datasets/f45bkkt8pr/1
+    raw: Mendeley_SMS_Phishing/Mendeley_SMS_Phishing.csv
+    from:
+      type: nested_zip     # the Mendeley download is a zip inside a zip
+      archive: SMS PHISHING DATASET FOR MACHINE LEARNING AND PATTERN RECOGNITION.zip
+      member: SMS PHISHING DATASET FOR MACHINE LEARNING AND PATTERN RECOGNITION/Dataset_5971.zip
+      inner_member: Dataset_5971.csv
+    label_priority: 1    # ham / spam / smishing as published
+    field_priority: 2
+
+  UCI SMS Spam Collection:
+    link: https://archive.ics.uci.edu/dataset/228/sms+spam+collection
+    raw: UCI_SMS_Spam_Collection/UCI_SMS_Spam_Collection.txt
+    from:
+      type: zip
+      archive: sms+spam+collection.zip
+      member: SMSSpamCollection
+    label_priority: 2    # ham / spam as published
+    field_priority: 3
+
+# Label strings the sources publish, mapped to (spam, smishing). null = unannotated,
+# which the merge resolves after dedupe.
+label_mapping:
+  mendeley:
+    ham:      [0, 0]
+    spam:     [1, null]
+    smishing: [1, 1]
+  uci:
+    ham:      [0, 0]
+    spam:     [1, null]

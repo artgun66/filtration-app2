@@ -1,0 +1,12 @@
+# Sentence embeddings: 476 MB of cached .npy, over GitHub's 100 MB file limit.
+# Regenerate with `python scam-classification/embed.py` (keyed by row id, so the
+# rebuild is deterministic).
+scam-classification/embeddings/
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Machine-local Claude Code permissions
+.claude/settings.local.json
