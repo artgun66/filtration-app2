@@ -1,0 +1,341 @@
+id,batch,mapped_label,model_pred,model_conf,brand,smishtank_category,needs_sourcing
+635,romance,romance,romance,0.812867283821106,,Wrong Number/Romance Scam,0
+28,bank alert,bank alert,bank alert,0.9999591112136841,WELLS FARGO,Account Alert,0
+367,__fallback__,other,romance,0.8823092579841614,,Other,0
+63,tech support,tech support,tech support,0.9002610445022583,Netflix,Account Alert,0
+524,__fallback__,other,delivery and toll,0.5321177840232849,,Account Alert,0
+SOURCE-charity-10,charity,charity,,,,,1
+890,government impersonation,government impersonation,government impersonation,0.9999939203262329,IRS,Account Alert,0
+SOURCE-charity-15,charity,charity,,,,,1
+616,delivery and toll,delivery and toll,delivery and toll,0.9999779462814331,,Delivery,0
+396,tech support,tech support,delivery and toll,0.3744836747646332,Netflix,Account Alert,0
+95,__fallback__,other,romance,0.9566277861595154,,Other,0
+550,job offer,job offer,job offer,0.9991582632064819,Amazon,Job Advertisement,0
+438,tech support,tech support,delivery and toll,0.38333356380462646,Netflix,Account Alert,0
+571,__fallback__,other,investment and crypto,0.32981303334236145,Geico,Account Alert,0
+682,bank alert,bank alert,bank alert,0.9999991655349731,Wells Fargo,Account Alert,0
+712,job offer,job offer,job offer,0.9999581575393677,American Consumer,Job Advertisement,0
+SOURCE-utility-shutoff-13,utility shutoff,utility shutoff,,,,,1
+705,__fallback__,other,romance,0.9994292855262756,,Other,0
+194,romance,romance,romance,0.8990408182144165,,Wrong Number/Romance Scam,0
+990,government impersonation,government impersonation,government impersonation,0.9995102882385254,IRS,Account Alert,0
+532,tech support,tech support,tech support,0.7523505687713623,Amazon,Account Alert,0
+517,romance,romance,family emergency,0.9754212498664856,,Wrong Number/Romance Scam,0
+475,__fallback__,other,government impersonation,0.9914668798446655,,Other,0
+447,tech support,tech support,job offer,0.39020469784736633,Apple,Account Alert,0
+492,delivery and toll,delivery and toll,delivery and toll,0.9999984502792358,UPS,Delivery,0
+SOURCE-family-emergency-07,family emergency,family emergency,,,,,1
+321,tech support,tech support,delivery and toll,0.36460158228874207,Netflix,Account Alert,0
+427,tech support,tech support,delivery and toll,0.2652013301849365,Netflix,Account Alert,0
+SOURCE-family-emergency-11,family emergency,family emergency,,,,,1
+733,government impersonation,government impersonation,government impersonation,0.9775072932243347,EBT,Account Alert,0
+291,__fallback__,other,family emergency,0.9830684661865234,,Other,0
+108,government impersonation,government impersonation,bank alert,0.9981977343559265,EDD,Account Alert,0
+1005,bank alert,bank alert,investment and crypto,0.22705930471420288,VISA,Account Alert,0
+675,delivery and toll,delivery and toll,delivery and toll,0.9999786615371704,USPS,Delivery,0
+749,__fallback__,other,delivery and toll,0.9999595880508423,,Other,0
+318,tech support,tech support,romance,0.44212865829467773,Netflix,Other,0
+SOURCE-medicare-and-health-13,Medicare and health,Medicare and health,,,,,1
+133,__fallback__,other,delivery and toll,0.866852879524231,,Other,0
+795,__fallback__,other,romance,0.8259105086326599,,Other,0
+SOURCE-utility-shutoff-05,utility shutoff,utility shutoff,,,,,1
+SOURCE-utility-shutoff-17,utility shutoff,utility shutoff,,,,,1
+963,__fallback__,other,government impersonation,0.9972696900367737,,Other,0
+SOURCE-utility-shutoff-06,utility shutoff,utility shutoff,,,,,1
+SOURCE-family-emergency-17,family emergency,family emergency,,,,,1
+772,__fallback__,other,bank alert,0.4786874055862427,,Account Alert,0
+437,__fallback__,other,romance,0.9752330183982849,,Other,0
+512,romance,romance,family emergency,0.6583881974220276,Verizon,Wrong Number/Romance Scam,0
+136,job offer,job offer,job offer,0.9998548030853271,,Job Advertisement,0
+235,__fallback__,other,delivery and toll,0.9995803236961365,,Other,0
+764,__fallback__,other,romance,0.9755767583847046,,Other,0
+719,job offer,job offer,utility shutoff,0.9999674558639526,COMCAST INC,Job Advertisement,0
+417,investment and crypto,investment and crypto,government impersonation,0.9981843829154968,,Finance/Crypto,0
+840,prize and lottery,prize and lottery,prize and lottery,0.9999986886978149,T-Mobile,Prize/Contest,0
+724,__fallback__,other,bank alert,0.9992799162864685,,Account Alert,0
+SOURCE-family-emergency-01,family emergency,family emergency,,,,,1
+68,investment and crypto,investment and crypto,investment and crypto,0.9350248575210571,Whatsapp,Finance/Crypto,0
+SOURCE-utility-shutoff-20,utility shutoff,utility shutoff,,,,,1
+57,investment and crypto,investment and crypto,investment and crypto,0.9971151351928711,Whatsapp,Finance/Crypto,0
+SOURCE-utility-shutoff-03,utility shutoff,utility shutoff,,,,,1
+579,__fallback__,other,government impersonation,0.99992835521698,,Other,0
+510,tech support,tech support,family emergency,0.4056684970855713,Netflix,Account Alert,0
+375,__fallback__,other,delivery and toll,0.4211212992668152,Total Gym,Account Alert,0
+687,utility shutoff,utility shutoff,delivery and toll,0.9723898768424988,Flex Alert,Account Alert,0
+14,__fallback__,other,delivery and toll,0.9999089241027832,,Other,0
+767,__fallback__,other,delivery and toll,0.9994716048240662,,Other,0
+SOURCE-charity-20,charity,charity,,,,,1
+181,government impersonation,government impersonation,bank alert,0.635267972946167,EDD,Account Alert,0
+496,__fallback__,other,bank alert,0.9999841451644897,,Account Alert,0
+619,tech support,tech support,job offer,0.6544954776763916,Steam Card Delivery,Account Alert,0
+SOURCE-charity-19,charity,charity,,,,,1
+986,government impersonation,government impersonation,government impersonation,0.9999966621398926,IRS,Account Alert,0
+936,__fallback__,other,government impersonation,0.5030711889266968,,Account Alert,0
+SOURCE-family-emergency-03,family emergency,family emergency,,,,,1
+381,delivery and toll,delivery and toll,delivery and toll,0.9999837875366211,,Delivery,0
+218,__fallback__,other,bank alert,0.9996241331100464,,Account Alert,0
+42,job offer,job offer,job offer,0.9999244213104248,Whatsapp,Job Advertisement,0
+113,__fallback__,other,other,0.603489100933075,,Account Alert,0
+SOURCE-medicare-and-health-14,Medicare and health,Medicare and health,,,,,1
+346,bank alert,bank alert,bank alert,0.9266794323921204,CITI,Account Alert,0
+597,job offer,job offer,government impersonation,0.9999535083770752,Army,Job Advertisement,0
+446,tech support,tech support,tech support,0.5040178298950195,Amazon,Account Alert,0
+1011,__fallback__,other,government impersonation,0.9520068168640137,,Account Alert,0
+876,__fallback__,other,prize and lottery,0.9999827146530151,,Other,0
+660,__fallback__,other,delivery and toll,0.9880619049072266,,Other,0
+557,__fallback__,other,delivery and toll,0.9999972581863403,,Account Alert,0
+SOURCE-charity-12,charity,charity,,,,,1
+124,delivery and toll,delivery and toll,delivery and toll,0.9999967813491821,USPS,Delivery,0
+918,government impersonation,government impersonation,government impersonation,0.9999872446060181,IRS,Account Alert,0
+997,investment and crypto,investment and crypto,Medicare and health,0.9793732166290283,MetaMask,Account Alert,0
+127,__fallback__,other,prize and lottery,0.9977667331695557,Costco,Other,0
+1012,investment and crypto,investment and crypto,government impersonation,0.9999860525131226,IRS,Finance/Crypto,0
+567,tech support,tech support,delivery and toll,0.2977120578289032,Netflix,Account Alert,0
+530,tech support,tech support,investment and crypto,0.4292912781238556,Amazon,Account Alert,0
+73,bank alert,bank alert,bank alert,0.9999368190765381,Wells Fargo,Account Alert,0
+742,__fallback__,other,delivery and toll,0.9992408752441406,,Other,0
+911,government impersonation,government impersonation,government impersonation,0.9999927282333374,IRS,Account Alert,0
+58,__fallback__,other,romance,0.9937100410461426,,Other,0
+SOURCE-charity-11,charity,charity,,,,,1
+293,government impersonation,government impersonation,government impersonation,0.9800091981887817,Marine Corps,Lawsuits/Settlements,0
+917,__fallback__,other,romance,0.9625402092933655,,Other,0
+902,__fallback__,other,prize and lottery,0.6128595471382141,,Other,0
+592,prize and lottery,prize and lottery,prize and lottery,0.9999992847442627,CVS,Prize/Contest,0
+708,government impersonation,government impersonation,bank alert,0.9990897178649902,EDD,Account Alert,0
+296,delivery and toll,delivery and toll,delivery and toll,0.9999969005584717,,Delivery,0
+692,bank alert,bank alert,bank alert,0.9989277720451355,Bank of America,Account Alert,0
+315,romance,romance,romance,0.9996121525764465,,Wrong Number/Romance Scam,0
+440,tech support,tech support,tech support,0.2598596215248108,Netflix,Account Alert,0
+587,bank alert,bank alert,bank alert,0.9999998807907104,WELLS FARGO,Account Alert,0
+548,investment and crypto,investment and crypto,romance,0.9999959468841553,Whatsapp,Finance/Crypto,0
+743,__fallback__,other,other,0.6406663060188293,,Other,0
+955,__fallback__,other,bank alert,0.9997060894966125,,Other,0
+938,investment and crypto,investment and crypto,government impersonation,0.2614907920360565,,Finance/Crypto,0
+56,__fallback__,other,romance,0.9969995021820068,,Other,0
+580,bank alert,bank alert,bank alert,0.998443067073822,CHASE,Account Alert,0
+364,bank alert,bank alert,bank alert,0.9439034461975098,Altura Credit Union,Account Alert,0
+20,__fallback__,other,bank alert,0.9999576807022095,,Other,0
+810,bank alert,bank alert,bank alert,0.9226280450820923,Bank of America,Account Alert,0
+428,tech support,tech support,romance,0.6442241072654724,T-Mobile,Other,0
+SOURCE-utility-shutoff-09,utility shutoff,utility shutoff,,,,,1
+23,delivery and toll,delivery and toll,delivery and toll,0.6981093287467957,FedEx,Delivery,0
+SOURCE-utility-shutoff-02,utility shutoff,utility shutoff,,,,,1
+230,bank alert,bank alert,bank alert,0.9995953440666199,Bank of America,Account Alert,0
+941,government impersonation,government impersonation,other,0.9752935171127319,IRS,Other,0
+895,investment and crypto,investment and crypto,government impersonation,0.9999978542327881,IRS,Finance/Crypto,0
+402,__fallback__,other,bank alert,0.9998878240585327,Walmart,Account Alert,0
+792,job offer,job offer,job offer,0.9999884366989136,ArrowBar,Job Advertisement,0
+SOURCE-medicare-and-health-20,Medicare and health,Medicare and health,,,,,1
+495,__fallback__,other,bank alert,0.9999717473983765,,Account Alert,0
+SOURCE-charity-07,charity,charity,,,,,1
+892,__fallback__,other,government impersonation,0.9965413212776184,,Other,0
+470,__fallback__,other,utility shutoff,0.2753675878047943,Costco,Other,0
+952,government impersonation,government impersonation,government impersonation,0.9999924898147583,IRS,Other,0
+SOURCE-medicare-and-health-03,Medicare and health,Medicare and health,,,,,1
+304,tech support,tech support,tech support,0.8844085335731506,Amazon,Account Alert,0
+751,__fallback__,other,delivery and toll,0.9883174300193787,,Account Alert,0
+SOURCE-utility-shutoff-07,utility shutoff,utility shutoff,,,,,1
+964,__fallback__,other,bank alert,0.9981809854507446,,Account Alert,0
+808,__fallback__,other,bank alert,0.9562287926673889,,Account Alert,0
+376,tech support,tech support,tech support,0.9829896688461304,Amazon,Account Alert,0
+223,bank alert,bank alert,bank alert,0.9993879795074463,Bank of America,Account Alert,0
+252,bank alert,bank alert,bank alert,0.9965333938598633,Chase Bank,Account Alert,0
+36,government impersonation,government impersonation,prize and lottery,0.5589880347251892,,Lawsuits/Settlements,0
+SOURCE-medicare-and-health-17,Medicare and health,Medicare and health,,,,,1
+247,bank alert,bank alert,bank alert,0.9998787641525269,Navy Federal,Account Alert,0
+215,bank alert,bank alert,government impersonation,0.9996864795684814,Bank of America,Account Alert,0
+878,investment and crypto,investment and crypto,government impersonation,0.999991774559021,IRS,Finance/Crypto,0
+894,government impersonation,government impersonation,government impersonation,0.9999918937683105,IRS,Account Alert,0
+SOURCE-medicare-and-health-12,Medicare and health,Medicare and health,,,,,1
+761,__fallback__,other,romance,0.9566252827644348,,Other,0
+480,tech support,tech support,tech support,0.8493067026138306,Netflix,Account Alert,0
+776,__fallback__,other,government impersonation,0.9699235558509827,,Other,0
+806,job offer,job offer,job offer,0.9985226988792419,Indeed,Job Advertisement,0
+928,investment and crypto,investment and crypto,government impersonation,0.9999980926513672,IRS,Finance/Crypto,0
+511,__fallback__,other,romance,0.9603586792945862,,Other,0
+824,__fallback__,other,romance,0.9971101880073547,,Other,0
+74,bank alert,bank alert,bank alert,0.9936356544494629,Citizens Bank,Account Alert,0
+85,bank alert,bank alert,bank alert,0.9370124936103821,Bank of America,Account Alert,0
+SOURCE-family-emergency-19,family emergency,family emergency,,,,,1
+SOURCE-medicare-and-health-02,Medicare and health,Medicare and health,,,,,1
+832,prize and lottery,prize and lottery,prize and lottery,0.999963641166687,,Prize/Contest,0
+929,delivery and toll,delivery and toll,delivery and toll,0.9999613761901855,USPS,Delivery,0
+350,prize and lottery,prize and lottery,prize and lottery,0.9999504089355469,,Prize/Contest,0
+SOURCE-medicare-and-health-11,Medicare and health,Medicare and health,,,,,1
+1000,investment and crypto,investment and crypto,government impersonation,0.25680798292160034,NavyFed,Finance/Crypto,0
+1009,__fallback__,other,delivery and toll,0.9935035109519958,,Account Alert,0
+1045,government impersonation,government impersonation,government impersonation,0.934932291507721,IRS,Other,0
+545,__fallback__,other,family emergency,0.7879263758659363,,Other,0
+620,prize and lottery,prize and lottery,romance,0.9085544943809509,Givingli,Prize/Contest,0
+SOURCE-utility-shutoff-15,utility shutoff,utility shutoff,,,,,1
+947,investment and crypto,investment and crypto,other,0.9500451683998108,IRS,Finance/Crypto,0
+509,__fallback__,other,family emergency,0.5729936361312866,,Other,0
+600,__fallback__,other,romance,0.9591458439826965,OPRAH,Other,0
+983,__fallback__,other,government impersonation,0.9765790700912476,,Account Alert,0
+SOURCE-family-emergency-16,family emergency,family emergency,,,,,1
+SOURCE-utility-shutoff-19,utility shutoff,utility shutoff,,,,,1
+419,tech support,tech support,romance,0.9173035621643066,Netflix,Other,0
+962,investment and crypto,investment and crypto,government impersonation,0.9999961853027344,IRS,Finance/Crypto,0
+SOURCE-family-emergency-04,family emergency,family emergency,,,,,1
+555,job offer,job offer,job offer,0.9432716369628906,Amazon,Job Advertisement,0
+241,__fallback__,other,other,0.570174515247345,,Other,0
+SOURCE-medicare-and-health-07,Medicare and health,Medicare and health,,,,,1
+896,__fallback__,other,government impersonation,0.9999954700469971,,Other,0
+933,delivery and toll,delivery and toll,delivery and toll,0.9999988079071045,AnPost,Delivery,0
+SOURCE-charity-14,charity,charity,,,,,1
+SOURCE-charity-18,charity,charity,,,,,1
+627,job offer,job offer,job offer,0.9991158843040466,"CVS, PUBLIX, HOME DEPOT, WALMART, KROGER, BEST BUY",Job Advertisement,0
+404,__fallback__,other,family emergency,0.9930604696273804,,Other,0
+966,__fallback__,other,government impersonation,0.997637152671814,,Other,0
+80,__fallback__,other,bank alert,0.99944669008255,,Account Alert,0
+SOURCE-family-emergency-02,family emergency,family emergency,,,,,1
+220,prize and lottery,prize and lottery,prize and lottery,0.9999997615814209,,Prize/Contest,0
+401,tech support,tech support,bank alert,0.9023171663284302,GameStop,Account Alert,0
+349,delivery and toll,delivery and toll,delivery and toll,0.9999979734420776,UPS,Delivery,0
+SOURCE-family-emergency-06,family emergency,family emergency,,,,,1
+420,__fallback__,other,family emergency,0.9626729488372803,,Other,0
+SOURCE-charity-03,charity,charity,,,,,1
+551,job offer,job offer,job offer,0.9998574256896973,Whatsapp,Job Advertisement,0
+SOURCE-utility-shutoff-11,utility shutoff,utility shutoff,,,,,1
+SOURCE-charity-01,charity,charity,,,,,1
+286,prize and lottery,prize and lottery,delivery and toll,0.9995532631874084,,Prize/Contest,0
+SOURCE-family-emergency-08,family emergency,family emergency,,,,,1
+SOURCE-family-emergency-20,family emergency,family emergency,,,,,1
+SOURCE-medicare-and-health-15,Medicare and health,Medicare and health,,,,,1
+968,investment and crypto,investment and crypto,government impersonation,0.9999926090240479,IRS,Finance/Crypto,0
+958,__fallback__,other,government impersonation,0.6140227317810059,,Account Alert,0
+553,tech support,tech support,delivery and toll,0.9999768733978271,Twitter,Account Alert,0
+118,__fallback__,other,romance,0.9747852683067322,,Other,0
+SOURCE-medicare-and-health-08,Medicare and health,Medicare and health,,,,,1
+SOURCE-medicare-and-health-16,Medicare and health,Medicare and health,,,,,1
+920,government impersonation,government impersonation,government impersonation,0.9999895095825195,IRS,Other,0
+943,investment and crypto,investment and crypto,government impersonation,0.9962249994277954,IRS,Finance/Crypto,0
+782,__fallback__,other,family emergency,0.20170125365257263,Eleven,Account Alert,0
+930,government impersonation,government impersonation,government impersonation,0.9999916553497314,IRS,Other,0
+SOURCE-medicare-and-health-05,Medicare and health,Medicare and health,,,,,1
+SOURCE-medicare-and-health-18,Medicare and health,Medicare and health,,,,,1
+355,__fallback__,other,delivery and toll,0.9988517761230469,,Other,0
+SOURCE-medicare-and-health-19,Medicare and health,Medicare and health,,,,,1
+793,__fallback__,other,bank alert,0.9999819993972778,,Account Alert,0
+874,investment and crypto,investment and crypto,government impersonation,0.9999945163726807,IRS,Finance/Crypto,0
+518,__fallback__,other,delivery and toll,0.999992847442627,,Other,0
+709,__fallback__,other,romance,0.9994463324546814,,Other,0
+32,bank alert,bank alert,bank alert,0.8222532868385315,Chase Bank,Account Alert,0
+SOURCE-medicare-and-health-09,Medicare and health,Medicare and health,,,,,1
+505,__fallback__,other,romance,0.7740287184715271,,Other,0
+177,romance,romance,romance,0.7930935025215149,,Wrong Number/Romance Scam,0
+434,__fallback__,other,bank alert,0.9996082186698914,WALMART,Account Alert,0
+950,__fallback__,other,delivery and toll,0.48361736536026,,Account Alert,0
+188,romance,romance,romance,0.9905872941017151,,Wrong Number/Romance Scam,0
+653,tech support,tech support,romance,0.7523474097251892,Netflix,Account Alert,0
+718,government impersonation,government impersonation,bank alert,0.9995206594467163,EDD,Account Alert,0
+471,__fallback__,other,government impersonation,0.4701121151447296,,Other,0
+229,investment and crypto,investment and crypto,investment and crypto,0.6638950705528259,Bank of America,Finance/Crypto,0
+277,prize and lottery,prize and lottery,prize and lottery,0.9997546076774597,CVS,Prize/Contest,0
+756,romance,romance,romance,0.9825573563575745,,Wrong Number/Romance Scam,0
+464,investment and crypto,investment and crypto,investment and crypto,0.9985936284065247,Bitcoin OF AMERICA,Other,0
+570,__fallback__,other,bank alert,0.9260464906692505,Costco,Account Alert,0
+923,__fallback__,other,tech support,0.27248287200927734,,Account Alert,0
+SOURCE-family-emergency-09,family emergency,family emergency,,,,,1
+744,investment and crypto,investment and crypto,prize and lottery,0.9969636797904968,,Finance/Crypto,0
+38,__fallback__,other,bank alert,0.999963641166687,,Other,0
+96,__fallback__,other,bank alert,0.8816384077072144,,Other,0
+SOURCE-charity-09,charity,charity,,,,,1
+SOURCE-utility-shutoff-12,utility shutoff,utility shutoff,,,,,1
+1010,__fallback__,other,bank alert,0.9871461391448975,,Account Alert,0
+574,__fallback__,other,bank alert,0.9991208910942078,ZEUS,Account Alert,0
+1020,government impersonation,government impersonation,government impersonation,0.9999920129776001,IRS,Account Alert,0
+1044,government impersonation,government impersonation,government impersonation,0.9908750057220459,IRS,Other,0
+225,bank alert,bank alert,bank alert,0.9998527765274048,Bank of America,Account Alert,0
+SOURCE-medicare-and-health-01,Medicare and health,Medicare and health,,,,,1
+741,__fallback__,other,romance,0.8335665464401245,,Other,0
+971,investment and crypto,investment and crypto,government impersonation,0.9999946355819702,,Finance/Crypto,0
+803,__fallback__,other,romance,0.8740713000297546,,Other,0
+478,prize and lottery,prize and lottery,prize and lottery,0.9999966621398926,,Prize/Contest,0
+750,__fallback__,other,delivery and toll,0.999062716960907,,Other,0
+311,government impersonation,government impersonation,government impersonation,0.9973443150520325,EDD,Account Alert,0
+479,investment and crypto,investment and crypto,government impersonation,0.9999974966049194,HMRC,Finance/Crypto,0
+SOURCE-medicare-and-health-04,Medicare and health,Medicare and health,,,,,1
+SOURCE-charity-04,charity,charity,,,,,1
+960,investment and crypto,investment and crypto,other,0.9930423498153687,IRS,Finance/Crypto,0
+967,investment and crypto,investment and crypto,government impersonation,0.9999935626983643,IRS,Finance/Crypto,0
+713,romance,romance,romance,0.9995555281639099,,Wrong Number/Romance Scam,0
+617,__fallback__,other,other,0.9999411106109619,,Account Alert,0
+606,__fallback__,other,delivery and toll,0.9995760321617126,,Other,0
+21,__fallback__,other,bank alert,0.9999196529388428,,Other,0
+618,__fallback__,other,delivery and toll,0.9999412298202515,,Account Alert,0
+1047,delivery and toll,delivery and toll,delivery and toll,0.9999004602432251,USPS,Delivery,0
+SOURCE-utility-shutoff-16,utility shutoff,utility shutoff,,,,,1
+89,bank alert,bank alert,bank alert,0.9996296167373657,Bank of America,Account Alert,0
+288,tech support,tech support,tech support,0.6928700804710388,Netflix,Account Alert,0
+414,prize and lottery,prize and lottery,prize and lottery,0.999998927116394,Apple,Prize/Contest,0
+487,prize and lottery,prize and lottery,prize and lottery,0.9991599321365356,,Prize/Contest,0
+172,romance,romance,romance,0.9961752891540527,,Wrong Number/Romance Scam,0
+588,delivery and toll,delivery and toll,delivery and toll,0.9999984502792358,USPS,Delivery,0
+193,romance,romance,romance,0.9745520949363708,,Wrong Number/Romance Scam,0
+SOURCE-medicare-and-health-10,Medicare and health,Medicare and health,,,,,1
+400,bank alert,bank alert,bank alert,0.5202546119689941,Alaska USA,Account Alert,0
+634,investment and crypto,investment and crypto,bank alert,0.538921058177948,,Finance/Crypto,0
+696,__fallback__,other,romance,0.9879522919654846,,Other,0
+677,__fallback__,other,delivery and toll,0.5130079388618469,,Account Alert,0
+SOURCE-charity-08,charity,charity,,,,,1
+889,government impersonation,government impersonation,government impersonation,0.9999934434890747,IRS,Account Alert,0
+SOURCE-utility-shutoff-14,utility shutoff,utility shutoff,,,,,1
+432,bank alert,bank alert,bank alert,0.9897247552871704,Wells Fargo,Account Alert,0
+559,__fallback__,other,romance,0.6986362338066101,unusa,Account Alert,0
+SOURCE-charity-13,charity,charity,,,,,1
+940,__fallback__,other,delivery and toll,0.4608343839645386,,Account Alert,0
+SOURCE-charity-06,charity,charity,,,,,1
+SOURCE-charity-05,charity,charity,,,,,1
+SOURCE-medicare-and-health-06,Medicare and health,Medicare and health,,,,,1
+SOURCE-charity-02,charity,charity,,,,,1
+151,__fallback__,other,bank alert,0.8875584006309509,Pbpls,Other,0
+SOURCE-family-emergency-05,family emergency,family emergency,,,,,1
+893,government impersonation,government impersonation,government impersonation,0.9999943971633911,IRS,Account Alert,0
+276,prize and lottery,prize and lottery,prize and lottery,0.9999449253082275,Home Depot,Prize/Contest,0
+694,__fallback__,other,government impersonation,0.9890844225883484,RPC,Other,0
+308,investment and crypto,investment and crypto,bank alert,0.9988377690315247,Chase Morgan,Finance/Crypto,0
+339,__fallback__,other,bank alert,0.9566531181335449,,Account Alert,0
+371,__fallback__,other,job offer,0.18576443195343018,,Account Alert,0
+258,tech support,tech support,bank alert,0.532732367515564,Netflix,Account Alert,0
+SOURCE-family-emergency-14,family emergency,family emergency,,,,,1
+50,investment and crypto,investment and crypto,investment and crypto,0.9977194666862488,,Finance/Crypto,0
+1032,government impersonation,government impersonation,government impersonation,0.9999961853027344,IRS,Account Alert,0
+13,job offer,job offer,prize and lottery,0.9992210865020752,,Job Advertisement,0
+903,job offer,job offer,job offer,0.9979941844940186,,Job Advertisement,0
+289,tech support,tech support,bank alert,0.9992691874504089,Amazon,Account Alert,0
+542,tech support,tech support,tech support,0.4709138572216034,Amazon,Account Alert,0
+70,tech support,tech support,bank alert,0.20357801020145416,Amazon,Account Alert,0
+1050,investment and crypto,investment and crypto,government impersonation,0.9724858999252319,IRS,Finance/Crypto,0
+1023,investment and crypto,investment and crypto,bank alert,0.8616812825202942,Ozow,Finance/Crypto,0
+199,romance,romance,romance,0.5698511600494385,,Wrong Number/Romance Scam,0
+1046,__fallback__,other,government impersonation,0.9999589920043945,,Other,0
+SOURCE-utility-shutoff-08,utility shutoff,utility shutoff,,,,,1
+SOURCE-family-emergency-10,family emergency,family emergency,,,,,1
+473,__fallback__,other,prize and lottery,0.9999808073043823,,Other,0
+122,bank alert,bank alert,bank alert,0.7337754964828491,Bank of America,Account Alert,0
+622,bank alert,bank alert,bank alert,0.9990851879119873,Navy FCU,Other,0
+1025,__fallback__,other,other,0.6564332842826843,,Account Alert,0
+SOURCE-family-emergency-13,family emergency,family emergency,,,,,1
+996,delivery and toll,delivery and toll,delivery and toll,0.9999990463256836,CK,Delivery,0
+SOURCE-charity-17,charity,charity,,,,,1
+SOURCE-utility-shutoff-10,utility shutoff,utility shutoff,,,,,1
+638,__fallback__,other,delivery and toll,0.7939857840538025,,Account Alert,0
+537,tech support,tech support,family emergency,0.39667296409606934,Netflix,Account Alert,0
+SOURCE-family-emergency-18,family emergency,family emergency,,,,,1
+SOURCE-utility-shutoff-04,utility shutoff,utility shutoff,,,,,1
+443,tech support,tech support,delivery and toll,0.5034224987030029,Netflix,Account Alert,0
+SOURCE-family-emergency-12,family emergency,family emergency,,,,,1
+483,__fallback__,other,delivery and toll,0.9931691884994507,,Other,0
+1041,__fallback__,other,family emergency,0.999953031539917,,Other,0
+611,investment and crypto,investment and crypto,job offer,0.5369230508804321,Amazon,Finance/Crypto,0
+SOURCE-utility-shutoff-18,utility shutoff,utility shutoff,,,,,1
+SOURCE-family-emergency-15,family emergency,family emergency,,,,,1
+1039,__fallback__,other,other,0.7819778323173523,,Account Alert,0
+SOURCE-charity-16,charity,charity,,,,,1
+984,government impersonation,government impersonation,government impersonation,0.9999897480010986,IRS,Account Alert,0
+922,investment and crypto,investment and crypto,government impersonation,0.9999840259552002,IRS,Finance/Crypto,0
+138,romance,romance,romance,0.9987156391143799,Coffee Meets Bagel,Wrong Number/Romance Scam,0
+451,prize and lottery,prize and lottery,prize and lottery,0.9999980926513672,EuroMillions,Prize/Contest,0
+568,tech support,tech support,delivery and toll,0.37831589579582214,Netflix,Account Alert,0
+377,bank alert,bank alert,bank alert,0.9996485710144043,Bank Of America,Account Alert,0
