@@ -16,6 +16,14 @@ Arms, per the plan:
   6 ann       MLP on Qwen embeddings, tuned with Optuna
   7 qwen_feat_clean  arm 5 retrained without the keyword-labelled source (ablation)
 
+Then three candidates for the phone app, where the 0.6B encoder is too big to ship:
+  feat_only    the 29 features + 38 keyword flags, no encoder at all
+  minilm_feat  all-MiniLM-L6-v2 + the 29 features
+  bge_feat     BGE-small-en-v1.5 + the 29 features
+Plain `minilm` holds only 0.749 recall at 0.90 precision against qwen_feat_clean's
+0.944, so an encoder alone is not enough; these test whether the features close the
+gap the way they did for qwen -> qwen_feat.
+
 Every arm shares one split, one target and one threshold rule, so only the
 representation varies. The threshold is fitted on validation to hold 95% recall and
 applied to test unchanged; test is never used to choose anything.
@@ -31,8 +39,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)          # the dataset package defines the features and the rule
 
-from dataset import features as F           # noqa: E402
-from dataset.keywords import KEYWORDS       # noqa: E402
+from dataset import features as F                          # noqa: E402
+from dataset.keywords import KEYWORDS, COLUMNS as KW_COLUMNS   # noqa: E402
 
 RESULTS = M.RESULTS
 ARMS = M.CFG["arms"]
@@ -56,6 +64,19 @@ def load_embeddings(name, ids):
     return hit
 
 
+def engineered(ids):
+    """The 29 features from the parquet, aligned to `ids`."""
+    feats = pd.read_parquet(PARQUET)
+    return feats.set_index("id").loc[ids][F.FEATURE_NAMES].to_numpy(np.float32)
+
+
+# Arms whose representation is one encoder plus the 29 features. The on-device
+# candidates sit here: only the encoder changes, so the size/accuracy trade is the
+# only thing being measured.
+ENCODER_FEAT = {"qwen_feat": "qwen", "qwen_feat_clean": "qwen",
+                "minilm_feat": "minilm", "bge_feat": "bge"}
+
+
 def feature_matrix(arm, df, ids):
     """Return (X, feature_names). X is dense unless the arm is TF-IDF."""
     if arm == "tfidf":
@@ -66,11 +87,17 @@ def feature_matrix(arm, df, ids):
     if arm in ("qwen", "ann"):
         v = load_embeddings("qwen", ids)
         return v, [f"emb{i}" for i in range(v.shape[1])]
-    if arm in ("qwen_feat", "qwen_feat_clean"):
-        v = load_embeddings("qwen", ids)
-        feats = pd.read_parquet(PARQUET)
-        feats = feats.set_index("id").loc[ids][F.FEATURE_NAMES].to_numpy(np.float32)
-        return np.hstack([v, feats]), ([f"emb{i}" for i in range(v.shape[1])] + F.FEATURE_NAMES)
+    if arm == "feat_only":
+        # No encoder at all: the 29 features plus the 38 keyword flags. The floor for
+        # the phone app -- if this is good enough there is no tokenizer and no ONNX
+        # encoder to ship, just a ~100 KB tree ensemble.
+        kw = df.set_index("id").loc[ids][KW_COLUMNS].to_numpy(np.float32)
+        return (np.hstack([engineered(ids), kw]),
+                F.FEATURE_NAMES + list(KW_COLUMNS))
+    if arm in ENCODER_FEAT:
+        v = load_embeddings(ENCODER_FEAT[arm], ids)
+        return (np.hstack([v, engineered(ids)]),
+                [f"emb{i}" for i in range(v.shape[1])] + F.FEATURE_NAMES)
     raise ValueError(arm)
 
 

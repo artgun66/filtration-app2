@@ -3,6 +3,12 @@
 # rebuild is deterministic).
 scam-classification/embeddings/
 
+# Exported encoder graphs: 90 MB fp32 + 23 MB int8, both rebuilt by
+# `python serving/export_onnx.py`. The small artifacts next to them -- the heads, the
+# manifest, vocab.txt and golden_vectors.json -- ARE tracked: golden_vectors.json is
+# the fixture app/test/golden.ts runs against, so it belongs in the repo.
+serving/app_assets/encoder_*.onnx
+
 # Python
 __pycache__/
 *.py[cod]

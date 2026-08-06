@@ -6,8 +6,26 @@ Two stages, per `Cyber-Scout-Analysis-Plan.docx`:
 2. anything flagged goes to an LLM that names the **scam type** and the warning signs,
    in language an older adult can act on.
 
-This repository covers stage 1 end to end and stage 2's prompt. Building the phone app
-is out of scope.
+This repository covers stage 1 end to end, stage 2's prompt, and the on-device model
+the phone app runs.
+
+**The app runs both stages offline on the phone.** The 0.6B encoder behind the
+research-best arm is too large to ship, so the app uses `minilm_feat` -- MiniLM plus
+the 29 engineered features -- which costs 0.6 points of recall at 0.90 precision
+against `qwen_feat_clean` while being roughly a twentieth of the size. Stage 2's 3B
+LLM is replaced by a distilled linear head, because the app needs the scam *type* and
+not the written explanation the LLM was there to produce.
+
+| | research best | shipped on the phone |
+|---|---|---|
+| stage 1 | `qwen_feat_clean`, 0.6B encoder, ~600 MB | `minilm_feat`, 22M encoder, 90 MB |
+| recall @ precision 0.90 | 0.944 | 0.938 |
+| stage 2 | Qwen2.5-3B, 2.9 s/message | linear head, ~5K parameters |
+
+v1 checks a message the user shares or pastes, so it needs no SMS permissions at all.
+Filtering messages as they arrive is a later step -- it needs Play policy review on
+Android, and on iOS the filter extension only sees unknown senders and cannot show an
+explanation.
 
 ## Layout
 
@@ -40,8 +58,19 @@ scam-classification/         stage 1: safe vs suspicious
 
 scam-type-classification/    stage 2: which kind of scam
   scam_type_prompt.py        Qwen2.5-3B-Instruct, 4-bit
+  distill.py                 replaces it with a linear head for the phone
   prompt.yaml                model, generation settings and every prompt
   results/
+
+serving/                     one message in, one verdict out
+  predict.py                 the reference implementation; --verify replays the test split
+  export_onnx.py             encoder + heads -> ONNX, plus the conformance fixture
+  app_assets/                what the app bundles
+
+app/                         the phone app
+  src/features.ts            the 29 features, ported
+  src/tokenizer.ts           WordPiece, ported
+  test/golden.ts             both ports checked against Python
 
 example-code/                analysis_final.ipynb, the notebook this was ported from
 ```
@@ -69,9 +98,39 @@ python annotate.py                # ~1 min   -> fills split + model_pred in the 
 cd ../scam-type-classification
 python scam_type_prompt.py --limit 20        # eyeball stage 2
 python scam_type_prompt.py --evaluate --limit 300
+python distill.py --train --arm minilm_feat  # the phone's type head, ~1 min
 ```
 
 Then open `scam-classification/cyber_scout_analysis.ipynb`.
+
+## Building for the phone
+
+```bash
+cd serving
+python predict.py "your account is locked, verify at http://bit.ly/x"
+python predict.py --arm minilm_feat --verify   # replays the test split through this path
+python export_onnx.py --arm minilm_feat        # -> app_assets/
+python export_onnx.py --arm minilm_feat --check
+
+cd ..
+node --experimental-strip-types app/test/golden.ts
+```
+
+`--verify` and `golden.ts` are not optional ceremony. The 29 features exist three
+times over — Python, ONNX, TypeScript — and every way they can disagree is silent: a
+drifted feature or a misaligned column changes the answer without raising anything.
+`--verify` proves the Python serving path reproduces the metrics in
+`results/arm_metrics.csv`; `golden.ts` proves the TypeScript matches Python on all
+10,720 feature values and 160 token sequences in the fixture; `--check` proves the
+exported graph matches too.
+
+That last one caught a real defect. Dynamic int8 quantisation shrinks the encoder
+90 MB → 23 MB, but LightGBM splits on hard thresholds, so a small perturbation in one
+embedding dimension moves a row across a split and the ensemble follows. Measured over
+the fixture, int8 flipped *"Dear Customer never disclose your banking password
+username and PIN to ..."* from 0.032 to 0.943 — a real bank security notice, reported
+as a scam with 94% confidence. fp32 flips nothing, so `app_assets/manifest.json`
+points at `encoder_fp32.onnx` and the 67 MB stays.
 
 ## Environment
 
