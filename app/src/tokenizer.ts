@@ -13,10 +13,17 @@
 
 export type Vocab = Map<string, number>;
 
-export function loadVocab(text: string): Vocab {
+/**
+ * Accepts either form the exporter writes: the newline-separated vocab.txt, or the
+ * token array from vocab.json. The app uses the array, since Metro can require() JSON
+ * but reaching a bundled .txt would mean a filesystem round-trip on every cold start.
+ */
+export function loadVocab(source: string | string[]): Vocab {
+  const tokens = Array.isArray(source)
+    ? source
+    : source.split('\n').map((l) => l.replace(/\r$/, ''));
   const v: Vocab = new Map();
-  text.split('\n').forEach((line, i) => {
-    const tok = line.replace(/\r$/, '');
+  tokens.forEach((tok, i) => {
     if (tok.length > 0 && !v.has(tok)) v.set(tok, i);
   });
   return v;

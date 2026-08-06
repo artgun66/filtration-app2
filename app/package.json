@@ -1,0 +1,32 @@
+{
+  "name": "cyber-scout",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "private": true,
+  "scripts": {
+    "start": "expo start --dev-client",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "prebuild": "expo prebuild",
+    "test": "node --experimental-strip-types test/golden.ts && node --experimental-strip-types test/pipeline.ts",
+    "test:golden": "node --experimental-strip-types test/golden.ts",
+    "test:pipeline": "node --experimental-strip-types test/pipeline.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.2",
+    "@types/react": "~19.2.4",
+    "onnxruntime-node": "^1.20.1",
+    "typescript": "~6.0.3"
+  },
+  "dependencies": {
+    "expo": "^57.0.10",
+    "expo-asset": "~57.0.8",
+    "expo-clipboard": "~57.0.1",
+    "expo-share-intent": "^8.0.1",
+    "expo-status-bar": "~57.0.1",
+    "expo-system-ui": "~57.0.2",
+    "onnxruntime-react-native": "^1.24.3",
+    "react": "^19.2.8",
+    "react-native": "^0.86.2"
+  }
+}

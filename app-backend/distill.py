@@ -35,6 +35,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, "scam-classification"))
+# the 3B teacher stays in the research tree; only the distilled head belongs here
+sys.path.insert(0, os.path.join(ROOT, "scam-type-classification"))
 
 import modeling as M                            # noqa: E402
 import run_arms as R                            # noqa: E402

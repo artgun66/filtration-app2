@@ -58,22 +58,31 @@ scam-classification/         stage 1: safe vs suspicious
 
 scam-type-classification/    stage 2: which kind of scam
   scam_type_prompt.py        Qwen2.5-3B-Instruct, 4-bit
-  distill.py                 replaces it with a linear head for the phone
   prompt.yaml                model, generation settings and every prompt
   results/
 
-serving/                     one message in, one verdict out
-  predict.py                 the reference implementation; --verify replays the test split
-  export_onnx.py             encoder + heads -> ONNX, plus the conformance fixture
-  app_assets/                what the app bundles
-
-app/                         the phone app
-  src/features.ts            the 29 features, ported
-  src/tokenizer.ts           WordPiece, ported
-  test/golden.ts             both ports checked against Python
-
 example-code/                analysis_final.ipynb, the notebook this was ported from
 ```
+
+The four folders above are the research. The two below are the product, kept apart so
+neither is read as the other — the research best and what the phone runs are different
+models, for size reasons, and mixing them invites confusion about which numbers apply.
+
+```
+app-backend/                 the Python that builds what the phone ships
+  predict.py                 classify one message; --verify replays the test split
+  export_onnx.py             encoder + heads -> app/assets/models/, plus the fixture
+  distill.py                 trains the type head that replaces the 3B LLM
+
+app/                         the Expo app
+  App.tsx  src/  test/       paste box, on-device pipeline, conformance tests
+  assets/models/             what gets bundled into the APK
+```
+
+The dependency runs one way: `app-backend/` imports `modeling`, `run_arms` and
+`dataset.features` rather than copying them, so the 29 feature definitions and the
+fitted thresholds have exactly one source of truth. Nothing in the research tree
+imports the app.
 
 `dataset/` is the only importable package — stage 1 reads its features and keyword
 rule, stage 2 reads its taxonomy. Nothing goes the other way.
@@ -98,7 +107,6 @@ python annotate.py                # ~1 min   -> fills split + model_pred in the 
 cd ../scam-type-classification
 python scam_type_prompt.py --limit 20        # eyeball stage 2
 python scam_type_prompt.py --evaluate --limit 300
-python distill.py --train --arm minilm_feat  # the phone's type head, ~1 min
 ```
 
 Then open `scam-classification/cyber_scout_analysis.ipynb`.
@@ -106,31 +114,39 @@ Then open `scam-classification/cyber_scout_analysis.ipynb`.
 ## Building for the phone
 
 ```bash
-cd serving
+cd app-backend
 python predict.py "your account is locked, verify at http://bit.ly/x"
 python predict.py --arm minilm_feat --verify   # replays the test split through this path
-python export_onnx.py --arm minilm_feat        # -> app_assets/
+python distill.py --train --arm minilm_feat    # the phone's type head, ~1 min
+python export_onnx.py --arm minilm_feat        # -> ../app/assets/models/
 python export_onnx.py --arm minilm_feat --check
 
-cd ..
-node --experimental-strip-types app/test/golden.ts
+cd ../app
+npm install
+npm test                                       # both conformance tests
+npx expo prebuild --platform android
+npx expo run:android                           # needs a JDK and the Android SDK
 ```
 
-`--verify` and `golden.ts` are not optional ceremony. The 29 features exist three
-times over — Python, ONNX, TypeScript — and every way they can disagree is silent: a
-drifted feature or a misaligned column changes the answer without raising anything.
-`--verify` proves the Python serving path reproduces the metrics in
-`results/arm_metrics.csv`; `golden.ts` proves the TypeScript matches Python on all
-10,720 feature values and 160 token sequences in the fixture; `--check` proves the
-exported graph matches too.
+`--verify`, `--check` and `npm test` are not optional ceremony. The 29 features exist
+three times over — Python, ONNX, TypeScript — and every way they can disagree is
+silent: a drifted regex or a misaligned column changes the answer without raising
+anything. `--verify` proves the Python serving path reproduces the metrics in
+`results/arm_metrics.csv`; `--check` proves the exported graph matches; `npm test`
+proves the TypeScript matches on all 10,720 feature values and 160 token sequences,
+then runs the whole app pipeline through the real ONNX graphs and checks every verdict
+against Python.
 
 That last one caught a real defect. Dynamic int8 quantisation shrinks the encoder
 90 MB → 23 MB, but LightGBM splits on hard thresholds, so a small perturbation in one
 embedding dimension moves a row across a split and the ensemble follows. Measured over
 the fixture, int8 flipped *"Dear Customer never disclose your banking password
 username and PIN to ..."* from 0.032 to 0.943 — a real bank security notice, reported
-as a scam with 94% confidence. fp32 flips nothing, so `app_assets/manifest.json`
-points at `encoder_fp32.onnx` and the 67 MB stays.
+as a scam with 94% confidence. fp32 flips nothing, so
+`app/assets/models/manifest.json` points at `encoder_fp32.onnx` and the 67 MB stays.
+
+See `app/README.md` for the app itself and `app-backend/README.md` for rebuilding what
+it ships.
 
 ## Environment
 

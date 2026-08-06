@@ -2,7 +2,7 @@
 
   python export_onnx.py --arm minilm_feat
 
-Writes to serving/app_assets/:
+Writes to app/assets/models/, inside the Expo project so Metro bundles them:
   encoder_int8.onnx    tokens -> a 384-dim L2-normalised vector
   scam_head.onnx       that vector + the 29 features -> P(scam)
   type_head.onnx       the same input -> one of the covered scam types
@@ -35,7 +35,7 @@ from dataset import features as F               # noqa: E402
 from dataset import keywords as K               # noqa: E402
 import predict as P                             # noqa: E402
 
-ASSETS = os.path.join(HERE, "app_assets")
+ASSETS = os.path.join(ROOT, "app", "assets", "models")
 N_GOLDEN = 200
 
 # fp32, not int8, and the 67 MB is worth it. Measured with --check over the fixture:
@@ -101,10 +101,15 @@ def export_encoder(name, out_path):
     tok.save_pretrained(ASSETS)
     # transformers saves only tokenizer.json for a fast tokenizer, but the app's
     # WordPiece implementation wants the plain vocabulary, index order preserved.
+    # Written twice on purpose: vocab.txt to read, vocab.json because Metro can
+    # require() JSON directly and the app would otherwise need a filesystem read just
+    # to start up.
     vocab = tok.get_vocab()
+    ordered = [t for t, _ in sorted(vocab.items(), key=lambda kv: kv[1])]
     with open(os.path.join(ASSETS, "vocab.txt"), "w", encoding="utf-8") as fh:
-        for token, _ in sorted(vocab.items(), key=lambda kv: kv[1]):
-            fh.write(token + "\n")
+        fh.write("\n".join(ordered) + "\n")
+    with open(os.path.join(ASSETS, "vocab.json"), "w", encoding="utf-8") as fh:
+        json.dump(ordered, fh)
     return fp32, st
 
 

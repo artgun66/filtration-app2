@@ -20,14 +20,16 @@ import { extractFeatures, keywordFlags, type FeatureConfig } from '../src/featur
 import { loadVocab, encode } from '../src/tokenizer.ts';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const ASSETS = join(HERE, '..', '..', 'serving', 'app_assets');
+const ASSETS = join(HERE, '..', 'assets', 'models');
 
 const read = (f: string) => JSON.parse(readFileSync(join(ASSETS, f), 'utf-8'));
 
 const cfg: FeatureConfig = read('feature_config.json');
 const golden = read('golden_vectors.json');
 const manifest = read('manifest.json');
-const vocab = loadVocab(readFileSync(join(ASSETS, 'vocab.txt'), 'utf-8'));
+// vocab.json, not vocab.txt: this is the form the app loads, so it is the form the
+// test should exercise.
+const vocab = loadVocab(read('vocab.json') as string[]);
 
 const TOL = 1e-6;
 let failures = 0;

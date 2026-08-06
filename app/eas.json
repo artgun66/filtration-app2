@@ -1,0 +1,15 @@
+{
+  "cli": { "version": ">= 5.0.0", "appVersionSource": "local" },
+  "build": {
+    "preview": {
+      "//": "Sideloadable APK. The default production profile emits an AAB, which the Play Store wants and a phone cannot install directly.",
+      "android": { "buildType": "apk" },
+      "distribution": "internal"
+    },
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": { "buildType": "apk" }
+    }
+  }
+}

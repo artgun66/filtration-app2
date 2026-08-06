@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Cyber Scout",
+    "slug": "cyber-scout",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "scheme": "cyberscout",
+    "android": {
+      "package": "com.cyberscout.app"
+    },
+    "ios": {
+      "bundleIdentifier": "com.cyberscout.app",
+      "supportsTablet": true
+    },
+    "plugins": [
+      "onnxruntime-react-native",
+      "expo-asset",
+      "expo-status-bar",
+      [
+        "expo-share-intent",
+        {
+          "androidIntentFilters": ["text/*"]
+        }
+      ]
+    ]
+  }
+}
