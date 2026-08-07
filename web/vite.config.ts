@@ -1,37 +1,26 @@
-import type { Plugin } from 'vite';
 import { defineConfig } from 'vite';
 
 // Deployed under a subpath (GitHub Pages project sites) as often as at a domain root,
 // and every asset URL in main.ts is built from BASE_URL so both work.
 const base = process.env.VITE_BASE ?? '/';
 
-/**
- * Drop Vite's copy of the ONNX Runtime WASM binary.
- *
- * onnxruntime-web locates its binary two ways: a `new URL(..., import.meta.url)` that
- * Vite rewrites and emits under assets/ with a content hash, and `env.wasm.wasmPaths`,
- * the documented override. main.ts sets wasmPaths to `${BASE_URL}ort/`, which
- * scripts/prepare-assets.mjs fills from node_modules, so the hashed emission is never
- * fetched -- it is just 13 MB of dead weight in every deploy.
- *
- * If wasmPaths is ever removed from main.ts, remove this plugin in the same commit, or
- * the runtime will 404 looking for a file the build deleted.
- */
-function dropDuplicateOrtWasm(): Plugin {
-  return {
-    name: 'drop-duplicate-ort-wasm',
-    apply: 'build',
-    generateBundle(_options, bundle) {
-      for (const name of Object.keys(bundle)) {
-        if (/ort-wasm.*\.wasm$/.test(name)) delete bundle[name];
-      }
-    },
-  };
-}
+// The ONNX Runtime WASM binary is emitted by Vite itself, from the
+// `new URL(..., import.meta.url)` inside onnxruntime-web. Do not also stage a copy in
+// public/ and point env.wasm.wasmPaths at it: ORT `import()`s its Emscripten glue as a
+// module, and Vite will not serve public/ as source, so the dev server dies on load.
 
 export default defineConfig({
   base,
-  plugins: [dropDuplicateOrtWasm()],
+  optimizeDeps: {
+    // Dev only, and load-bearing. Vite normally pre-bundles dependencies into
+    // node_modules/.vite/deps/, which rewrites import.meta.url -- so ORT's
+    // `new URL('./ort-wasm-simd-threaded.wasm', import.meta.url)` resolves next to the
+    // pre-bundled copy, where the binary does not exist. The dev server then answers
+    // the 404 with index.html, and WebAssembly.instantiate reports a bad magic word
+    // ("<!do..."), which reads like a corrupt model rather than a missing file.
+    // Excluding it leaves the package where its own relative paths still work.
+    exclude: ['onnxruntime-web'],
+  },
   server: {
     // Vite only serves files under the project root; core/ is a sibling.
     fs: { allow: ['..'] },

@@ -18,11 +18,10 @@ app/.expo/
 app/dist/
 *.apk
 
-# The web build. public/models and public/ort are staged from app/assets/models and
-# node_modules by `npm run prepare-assets` -- copies, never sources.
+# The web build. public/models is staged from app/assets/models by
+# `npm run prepare-assets` -- copies, never sources.
 web/dist/
 web/public/models/
-web/public/ort/
 
 # Python
 __pycache__/

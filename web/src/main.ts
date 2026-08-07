@@ -14,9 +14,12 @@ import { loadBundle, alreadyCached } from './assets.ts';
 import { resultCard, progressPanel, errorPanel, installHint } from './ui.ts';
 import './styles.css';
 
-// Served from public/ort by scripts/prepare-assets.mjs. ORT fetches these by URL at
-// runtime, so Vite never sees the reference and cannot emit them on its own.
-ort.env.wasm.wasmPaths = `${import.meta.env.BASE_URL}ort/`;
+// env.wasm.wasmPaths is deliberately NOT set. onnxruntime-web reaches its runtime two
+// ways: it `import()`s the Emscripten glue as a module, and locates the binary through
+// `new URL(..., import.meta.url)`. Vite rewrites both and emits the .wasm itself, so
+// pointing wasmPaths at a copy in public/ actively breaks the dev server -- Vite
+// refuses to serve public/ as source, and the import fails before anything loads.
+// Let the bundler resolve it.
 
 // Multi-threading needs SharedArrayBuffer, which needs COOP/COEP response headers,
 // which most static hosts do not send. crossOriginIsolated tells us whether we

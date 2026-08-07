@@ -1,16 +1,17 @@
 /**
- * Stage everything the browser has to fetch into public/.
+ * Stage the exported models into public/.
  *
- * Two sources, neither of which belongs in this repo twice:
- *   - the exported models, written by ../../app-backend/export_onnx.py into
- *     ../app/assets/models. The 86 MB encoder is gitignored there and stays gitignored
- *     here; this copies rather than re-exports so the phone and the web app are
- *     provably running the same bytes.
- *   - onnxruntime-web's WASM runtime, which Vite will not emit on its own because ORT
- *     loads it by URL at runtime rather than importing it.
+ * They are written by ../../app-backend/export_onnx.py into ../app/assets/models. The
+ * 86 MB encoder is gitignored there and stays gitignored here; this copies rather than
+ * re-exports, so the phone and the web app provably run the same bytes.
  *
  * Copies are skipped when the destination already matches by size, because the encoder
  * is 86 MB and every dev server start would otherwise pay for it.
+ *
+ * The ONNX Runtime WASM binary is deliberately NOT staged here. Vite emits it from the
+ * `new URL(..., import.meta.url)` inside onnxruntime-web; a copy in public/ paired with
+ * env.wasm.wasmPaths breaks the dev server, because ORT imports its Emscripten glue as
+ * a module and Vite will not serve public/ as source.
  */
 import { copyFileSync, existsSync, mkdirSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -19,7 +20,6 @@ import { fileURLToPath } from 'node:url';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const WEB = join(HERE, '..');
 const MODELS_SRC = join(WEB, '..', 'app', 'assets', 'models');
-const ORT_SRC = join(WEB, 'node_modules', 'onnxruntime-web', 'dist');
 
 // golden_vectors.json and the tokenizer_*.json are test and provenance artifacts; the
 // browser never needs them, and one of them is 338 KB.
@@ -32,10 +32,6 @@ const MODELS = [
   'type_head.onnx',
 ];
 
-// The single-threaded SIMD build. The threaded path needs SharedArrayBuffer, which
-// needs COOP/COEP headers, which static hosts generally will not set -- see README.
-const ORT = ['ort-wasm-simd-threaded.wasm', 'ort-wasm-simd-threaded.mjs'];
-
 function stage(src, dstDir, names, label) {
   mkdirSync(dstDir, { recursive: true });
   let copied = 0;
@@ -46,9 +42,7 @@ function stage(src, dstDir, names, label) {
     if (!existsSync(from)) {
       throw new Error(
         `missing ${from}\n` +
-        (label === 'models'
-          ? '  run: cd ../app-backend && python export_onnx.py --arm minilm_feat'
-          : '  run: npm install'));
+        '  run: cd ../app-backend && python export_onnx.py --arm minilm_feat');
     }
     const size = statSync(from).size;
     bytes += size;
@@ -62,4 +56,3 @@ function stage(src, dstDir, names, label) {
 }
 
 stage(MODELS_SRC, join(WEB, 'public', 'models'), MODELS, 'models');
-stage(ORT_SRC, join(WEB, 'public', 'ort'), ORT, 'ort');

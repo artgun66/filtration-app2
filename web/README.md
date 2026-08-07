@@ -16,7 +16,7 @@ src/assets.ts           fetch + Cache API, with progress
 src/ui.ts               rendering; every sentence comes from ../core/copy.ts
 src/styles.css          theme carried over from the phone app
 public/manifest.webmanifest, public/sw.js, public/icons/
-scripts/prepare-assets.mjs   stages models and the ORT runtime into public/
+scripts/prepare-assets.mjs   stages the exported models into public/
 scripts/make_icons.py        draws the icons
 test/pipeline.ts        the whole pipeline through WASM vs Python
 ```
@@ -30,9 +30,9 @@ npm test               # verify before deploying
 npm run build          # -> dist/
 ```
 
-`prepare-assets` copies the exported models from `../app/assets/models` and the ORT
-WASM binary out of `node_modules`. It copies rather than re-exports, so the phone and
-the web app provably run the same bytes. If it complains the models are missing:
+`prepare-assets` copies the exported models from `../app/assets/models`. It copies
+rather than re-exports, so the phone and the web app provably run the same bytes. If it
+complains the models are missing:
 
 ```bash
 cd ../app-backend && python export_onnx.py --arm minilm_feat
@@ -67,9 +67,10 @@ an unsupported operator can degrade quietly rather than refuse to load. Last run
 160 messages, max|delta| 0.00327, decision flips 0, 38 ms/message
 ```
 
-Two things it does **not** cover, both needing a real browser: whether the WASM binary
-resolves from `env.wasm.wasmPaths`, and whether the Cache API actually keeps the 86 MB
-encoder between visits.
+One thing it does **not** cover, and it bit: the test hands ORT the WASM bytes directly,
+so it never exercises **URL resolution**. Both bugs found on first run in a real browser
+were resolution bugs the test could not have seen — see "Do not touch the ORT runtime
+paths" below. Browser-only concerns need a browser.
 
 ## What the user downloads
 
@@ -101,6 +102,32 @@ git repo. Set `VITE_BASE=/repo-name/` for a GitHub Pages project site.
 
 Whatever serves the WASM must send `Content-Type: application/wasm`, or the browser
 falls back from streaming compilation and startup gets noticeably slower.
+
+## Do not touch the ORT runtime paths
+
+Both bugs found the first time this ran in a browser were about *locating* the ONNX
+Runtime, not running it. Neither could fail in `npm test`, which hands ORT the bytes
+directly. Two rules, and the reasoning, so they are not undone:
+
+**Do not set `env.wasm.wasmPaths`.** It looks like the right API — it is what ORT's own
+docs suggest for a known location — but onnxruntime-web `import()`s its Emscripten glue
+as a *module*, not as a fetch. Point it at a copy in `public/` and Vite refuses to serve
+it, because `public/` is copied verbatim and never goes through module resolution. The
+dev server dies before anything loads. Vite already emits the binary from the
+`new URL(..., import.meta.url)` inside ORT; let it.
+
+**Keep `optimizeDeps.exclude: ['onnxruntime-web']`.** Vite pre-bundles dependencies into
+`node_modules/.vite/deps/`, which rewrites `import.meta.url` — so ORT's relative path to
+its binary resolves next to the pre-bundled copy, where no binary exists. The dev server
+answers that 404 with `index.html`, and the browser reports:
+
+```
+CompileError: WebAssembly.instantiate(): expected magic word 00 61 73 6d,
+found 3c 21 64 6f
+```
+
+`3c 21 64 6f` is `<!do`. **A WASM magic-word error is a 404 serving HTML**, not a corrupt
+binary — worth knowing before spending an afternoon on the model file.
 
 **Optional speed-up.** `main.ts` asks for 4 threads only when `crossOriginIsolated` is
 true, which needs the host to send:
