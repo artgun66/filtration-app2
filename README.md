@@ -21,6 +21,12 @@ not the written explanation the LLM was there to produce.
 | stage 1 | `qwen_feat_clean`, 0.6B encoder, ~600 MB | `minilm_feat`, 22M encoder, 90 MB |
 | recall @ precision 0.90 | 0.944 | 0.938 |
 | stage 2 | Qwen2.5-3B, 2.9 s/message | linear head, ~5K parameters |
+| stage 2 accuracy | 0.702 | 0.838 |
+
+Stage 2's row is not a typo: the 5K-parameter head beats the 3B LLM it replaces, scored
+on the same held-out rows against the same corrected labels (`distill.py --vs-teacher`).
+The teacher was never fine-tuned and answers over all 13 types, 12 of 191 times outside
+the 8 the corpus can support — the head simply cannot make that class of mistake.
 
 v1 checks a message the user shares or pastes, so it needs no SMS permissions at all.
 Filtering messages as they arrive is a later step -- it needs Play policy review on

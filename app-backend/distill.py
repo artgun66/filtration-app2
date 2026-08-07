@@ -7,6 +7,7 @@ one encoder and two heads.
 
   python distill.py --train                    # fit + evaluate, minutes
   python distill.py --compare                  # corrected labels vs the raw mapping
+  python distill.py --vs-teacher               # the head vs the 3B it replaces
   python distill.py --pseudo-label --limit 4000  # extend coverage with the 3B, hours
   python distill.py --train --with-pseudo
 
@@ -190,6 +191,74 @@ def train(arm, with_pseudo=False, seed=M.SEED, corrected=True):
     return clf
 
 
+TEACHER_EVAL = os.path.join(ROOT, "scam-type-classification", "results",
+                            "scam_type_eval_choice.csv")
+
+
+def _held_out(df, arm, seed):
+    """The exact test split train() uses, so nothing is scored on its own fit."""
+    from sklearn.model_selection import train_test_split
+
+    frame = training_rows(df, quiet=True)
+    tr, te = train_test_split(frame, test_size=0.25, random_state=seed,
+                              stratify=frame["type"])
+    return tr, te
+
+
+def vs_teacher(arm, seed=M.SEED):
+    """The 3B teacher against the distilled head, on the same rows and same labels.
+
+    The published 0.742 was scored against the mapping, and the head is now scored
+    against the corrections -- so the two numbers were never comparable. This rescores
+    the teacher's saved predictions on the corrected labels and restricts both to the
+    head's held-out split, which is the only set neither model has an unfair claim on.
+
+    The teacher's eval CSV carries no id, so the join is on message text.
+    """
+    from sklearn.metrics import f1_score
+
+    if not os.path.exists(TEACHER_EVAL):
+        raise SystemExit(f"no {TEACHER_EVAL}")
+
+    df = M.load()
+    tr, te = _held_out(df, arm, seed)
+
+    ev = pd.read_csv(TEACHER_EVAL)
+    text_to_id = dict(zip(df["text"].astype(str), df["id"]))
+    ev["id"] = ev["text"].astype(str).map(text_to_id)
+    joined = ev["id"].notna().sum()
+    print(f"teacher rows {len(ev)}, joined to the corpus by text: {joined}")
+
+    truth = dict(zip(te["id"], te["type"]))
+    ev = ev[ev["id"].isin(truth)].copy()
+    if ev.empty:
+        raise SystemExit("no teacher rows fall in the held-out split")
+    # A message can appear more than once in the corpus; one prediction per id is enough.
+    ev = ev.drop_duplicates(subset="id")
+    ev["truth"] = ev["id"].map(truth)
+
+    Xte, _ = _rows_to_X(df, arm, te)
+    Xtr, _ = _rows_to_X(df, arm, tr)
+    head = _fit(Xtr, tr["type"].to_numpy(), seed)
+    head_pred = pd.Series(head.predict(Xte), index=te["id"].to_numpy())
+
+    ev["head"] = ev["id"].map(head_pred)
+    print(f"scored on {len(ev)} held-out rows both models answered\n")
+
+    # macro-F1 is averaged over the head's 8 classes for both models. Left unrestricted
+    # it averages over every label either model emits, so the teacher is charged an F1
+    # of 0 for each of the 5 types with no rows in this split -- which measures the
+    # taxonomy, not the model. Answers outside the 8 still count against it, as misses.
+    classes = sorted(set(ev["truth"]))
+    for name, col in [("3B teacher", "pred"), ("linear head", "head")]:
+        acc = (ev[col] == ev["truth"]).mean()
+        f1 = f1_score(ev["truth"], ev[col], labels=classes, average="macro",
+                      zero_division=0)
+        outside = (~ev[col].isin(classes)).sum()
+        print(f"  {name:<12} accuracy {acc:.3f}   macro-F1 {f1:.3f}"
+              f"   answered outside the 8: {outside}")
+
+
 def compare(arm, seed=M.SEED):
     """Corrected labels against the mapping, scored on the same held-out rows.
 
@@ -279,6 +348,8 @@ def main():
                     help="ignore labeling/categorized_261.csv, train on the mapping")
     ap.add_argument("--compare", action="store_true",
                     help="corrected labels vs the mapping on the same held-out rows")
+    ap.add_argument("--vs-teacher", action="store_true",
+                    help="the 3B teacher vs the head, same rows and same labels")
     ap.add_argument("--limit", type=int, default=4000)
     ap.add_argument("--batch-size", type=int, default=0)
     a = ap.parse_args()
@@ -287,10 +358,12 @@ def main():
         pseudo_label(a.limit, a.batch_size or None)
     if a.compare:
         compare(a.arm)
+    if a.vs_teacher:
+        vs_teacher(a.arm)
     if a.train:
         train(a.arm, a.with_pseudo, corrected=not a.no_corrections)
-    if not (a.train or a.pseudo_label or a.compare):
-        ap.error("pass --train, --compare or --pseudo-label")
+    if not (a.train or a.pseudo_label or a.compare or a.vs_teacher):
+        ap.error("pass --train, --compare, --vs-teacher or --pseudo-label")
 
 
 if __name__ == "__main__":
