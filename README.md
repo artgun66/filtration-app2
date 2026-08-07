@@ -70,25 +70,39 @@ scam-type-classification/    stage 2: which kind of scam
 example-code/                analysis_final.ipynb, the notebook this was ported from
 ```
 
-The four folders above are the research. The two below are the product, kept apart so
+The four folders above are the research. The four below are the product, kept apart so
 neither is read as the other — the research best and what the phone runs are different
 models, for size reasons, and mixing them invites confusion about which numbers apply.
 
 ```
-app-backend/                 the Python that builds what the phone ships
+app-backend/                 the Python that builds what the app ships
   predict.py                 classify one message; --verify replays the test split
   export_onnx.py             encoder + heads -> app/assets/models/, plus the fixture
   distill.py                 trains the type head that replaces the 3B LLM
 
-app/                         the Expo app
-  App.tsx  src/  test/       paste box, on-device pipeline, conformance tests
+core/                        the pipeline, once
+  model.ts                   tokenize -> encode -> features -> heads
+  features.ts  tokenizer.ts  the 29 features and WordPiece, ported from Python
+  copy.ts                    every sentence the app says to the user
+
+app/                         the Expo app (Android, iOS)
+  App.tsx  src/  test/       paste box, share target, conformance tests
   assets/models/             what gets bundled into the APK
+
+web/                         the browser app (any phone, no app store)
+  index.html  src/  test/    one screen, Cache API, PWA
 ```
 
 The dependency runs one way: `app-backend/` imports `modeling`, `run_arms` and
 `dataset.features` rather than copying them, so the 29 feature definitions and the
 fitted thresholds have exactly one source of truth. Nothing in the research tree
 imports the app.
+
+`core/` is the same idea one level down. `core/model.ts` takes the ONNX runtime as an
+argument rather than importing one, so a single copy of the pipeline runs under
+`onnxruntime-react-native` on a phone, `onnxruntime-web` in a browser and
+`onnxruntime-node` in the tests. Three ports of the 29 features that could silently
+disagree was already the sharpest risk in this project; a fourth was not worth having.
 
 `dataset/` is the only importable package — stage 1 reads its features and keyword
 rule, stage 2 reads its taxonomy. Nothing goes the other way.
@@ -132,6 +146,11 @@ npm install
 npm test                                       # both conformance tests
 npx expo prebuild --platform android
 npx expo run:android                           # needs a JDK and the Android SDK
+
+cd ../web                                      # the browser build, no toolchain needed
+npm install
+npm test                                       # the same pipeline through WASM
+npm run dev
 ```
 
 `--verify`, `--check` and `npm test` are not optional ceremony. The 29 features exist
@@ -141,7 +160,9 @@ anything. `--verify` proves the Python serving path reproduces the metrics in
 `results/arm_metrics.csv`; `--check` proves the exported graph matches; `npm test`
 proves the TypeScript matches on all 10,720 feature values and 160 token sequences,
 then runs the whole app pipeline through the real ONNX graphs and checks every verdict
-against Python.
+against Python. `web/`'s own `npm test` repeats that last step under WebAssembly, which
+is a separate kernel implementation and can degrade quietly where the native one would
+refuse to load.
 
 That last one caught a real defect. Dynamic int8 quantisation shrinks the encoder
 90 MB → 23 MB, but LightGBM splits on hard thresholds, so a small perturbation in one
@@ -151,8 +172,18 @@ username and PIN to ..."* from 0.032 to 0.943 — a real bank security notice, r
 as a scam with 94% confidence. fp32 flips nothing, so
 `app/assets/models/manifest.json` points at `encoder_fp32.onnx` and the 67 MB stays.
 
-See `app/README.md` for the app itself and `app-backend/README.md` for rebuilding what
-it ships.
+See `app/README.md` for the phone app, `web/README.md` for the browser build and
+`app-backend/README.md` for rebuilding what they ship.
+
+## Two apps, one pipeline
+
+`app/` needs a JDK and the Android SDK to build, and on iOS every install route —
+TestFlight, ad-hoc, the App Store — requires Apple's $99/yr Developer Program. `web/`
+has no gatekeeper: a URL, HTTPS, and Add to Home Screen. It costs a 100 MB first load
+and roughly 3× the inference time (38 ms vs 11 ms per message on the same laptop), and
+it cannot be a share target on iOS.
+
+Both run `core/` unmodified. The choice is distribution, not capability.
 
 ## Environment
 

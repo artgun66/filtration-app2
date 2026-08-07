@@ -1,36 +1,17 @@
 /**
  * The verdict, written for someone deciding what to do about a text message.
  *
- * Three rules shaped this:
- *   - Lead with an action, not a score. "Do not tap any links" is usable; "0.94" is
- *     not. The probability is still shown, in words, because a verdict with no visible
- *     uncertainty invites blind trust.
- *   - Never imply coverage the model does not have. Four of the thirteen scam types
- *     have no training data, so a safe verdict says so plainly rather than reading as
- *     an all-clear.
- *   - Do not name a scam type unless the head is confident. "Not sure what kind" is a
- *     real answer and a better one than a wrong label.
+ * Layout only. Every sentence comes from core/copy.ts, so the phone and the web app
+ * cannot end up telling people different things -- see the rules documented there.
  */
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 import { C, T, S } from './theme.ts';
-import type { Verdict } from '../model.ts';
-
-/** Confidence in words. People act on "fairly sure", not on 0.83. */
-function confidenceWord(p: number, scam: boolean): string {
-  const strength = scam ? p : 1 - p;
-  if (strength >= 0.95) return 'Very confident';
-  if (strength >= 0.8) return 'Fairly confident';
-  return 'Not very confident';
-}
-
-const SCAM_ADVICE = [
-  'Do not tap any links in the message.',
-  'Do not reply, and do not call any number it gives.',
-  'If it claims to be your bank or a company you use, contact them using the number on your card or their official app.',
-  'Delete the message once you are done.',
-];
+import type { Verdict } from '../../../core/model.ts';
+import {
+  confidenceWord, HEADLINE, UNKNOWN_TYPE, SCAM_ADVICE, coverageCaveat, signalsHeading,
+} from '../../../core/copy.ts';
 
 export function ResultCard({ verdict, notCovered }: {
   verdict: Verdict;
@@ -44,7 +25,7 @@ export function ResultCard({ verdict, notCovered }: {
   return (
     <View style={[styles.card, { backgroundColor: bg, borderColor: accent }]}>
       <Text style={[styles.verdict, { color: fg }]}>
-        {scam ? 'This looks like a scam' : 'This looks safe'}
+        {scam ? HEADLINE.scam : HEADLINE.safe}
       </Text>
 
       <Text style={[styles.confidence, { color: fg }]}>
@@ -53,9 +34,7 @@ export function ResultCard({ verdict, notCovered }: {
       </Text>
 
       {scam && !verdict.type && (
-        <Text style={[styles.note, { color: fg }]}>
-          Not sure what kind of scam it is.
-        </Text>
+        <Text style={[styles.note, { color: fg }]}>{UNKNOWN_TYPE}</Text>
       )}
 
       {scam && (
@@ -69,21 +48,17 @@ export function ResultCard({ verdict, notCovered }: {
 
       {verdict.signals.length > 0 && (
         <View style={styles.block}>
-          <Text style={[styles.heading, { color: fg }]}>
-            {scam ? 'Why' : 'What we noticed'}
-          </Text>
+          <Text style={[styles.heading, { color: fg }]}>{signalsHeading(scam)}</Text>
           {verdict.signals.map((s) => (
             <Text key={s} style={[styles.item, { color: fg }]}>{'•  ' + s}</Text>
           ))}
         </View>
       )}
 
-      {!scam && notCovered.length > 0 && (
+      {!scam && coverageCaveat(notCovered) && (
         <View style={[styles.block, styles.caveat, { borderTopColor: accent }]}>
           <Text style={[styles.caveatText, { color: fg }]}>
-            Cyber Scout cannot yet spot every kind of scam. It does not recognise{' '}
-            {notCovered.join(', ')}. If a message feels wrong, trust that feeling and
-            check with someone you know.
+            {coverageCaveat(notCovered)}
           </Text>
         </View>
       )}

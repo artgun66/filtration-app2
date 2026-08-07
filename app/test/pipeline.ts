@@ -18,9 +18,9 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
-import { loadVocab } from '../src/tokenizer.ts';
-import { Scanner, type Manifest, type OrtLike } from '../src/model.ts';
-import type { FeatureConfig } from '../src/features.ts';
+import { loadVocab } from '../../core/tokenizer.ts';
+import { Scanner, type Manifest, type OrtLike } from '../../core/model.ts';
+import type { FeatureConfig } from '../../core/features.ts';
 
 const require = createRequire(import.meta.url);
 const ort = require('onnxruntime-node') as OrtLike;

@@ -16,8 +16,8 @@ import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { extractFeatures, keywordFlags, type FeatureConfig } from '../src/features.ts';
-import { loadVocab, encode } from '../src/tokenizer.ts';
+import { extractFeatures, keywordFlags, type FeatureConfig } from '../../core/features.ts';
+import { loadVocab, encode } from '../../core/tokenizer.ts';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ASSETS = join(HERE, '..', 'assets', 'models');

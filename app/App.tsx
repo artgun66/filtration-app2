@@ -15,8 +15,8 @@ import { StatusBar } from 'expo-status-bar';
 import { useShareIntent } from 'expo-share-intent';
 import * as ort from 'onnxruntime-react-native';
 
-import { Scanner, type Verdict, type OrtLike } from './src/model.ts';
-import { loadVocab } from './src/tokenizer.ts';
+import { Scanner, type Verdict, type OrtLike } from '../core/model.ts';
+import { loadVocab } from '../core/tokenizer.ts';
 import { manifest, featureConfig, vocabTokens, resolveModel } from './src/assets.ts';
 import { ResultCard } from './src/ui/ResultCard.tsx';
 import { C, T, S } from './src/ui/theme.ts';

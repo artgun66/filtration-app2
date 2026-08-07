@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Cyber Scout — check a text message</title>
+    <meta name="description" content="Paste a text message and find out whether it looks like a scam. Everything runs on your own phone." />
+
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <meta name="theme-color" content="#1F6FB2" />
+    <!-- iOS ignores the web app manifest's icons for the home screen and reads this. -->
+    <link rel="apple-touch-icon" href="./icons/icon-180.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Cyber Scout" />
+    <link rel="icon" href="./icons/icon-192.png" />
+  </head>
+  <body>
+    <header>
+      <h1>Cyber Scout</h1>
+      <p>Paste a text message below. Nothing you paste ever leaves this device.</p>
+    </header>
+
+    <form id="check">
+      <label for="message">The text message</label>
+      <textarea id="message" name="message" rows="6"
+                placeholder="Press and hold in your messages app, choose Copy, then paste it here."
+                autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
+      <button id="submit" type="submit">Check this message</button>
+    </form>
+
+    <div id="app"></div>
+
+    <footer>
+      Cyber Scout checks the message on your own device — it is never sent anywhere.
+      It cannot spot every kind of scam, so if something feels wrong, trust that
+      feeling and check with someone you know.
+    </footer>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

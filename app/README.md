@@ -6,15 +6,18 @@ which is why the app asks for no permissions at all.
 
 ```
 App.tsx                 paste box, share handling, loading state
-src/model.ts            the pipeline: tokenize -> encode -> features -> heads
-src/features.ts         the 29 engineered features, ported from dataset/features.py
-src/tokenizer.ts        WordPiece, ported
 src/assets.ts           bundled models -> paths onnxruntime can open
 src/ui/                 theme and the result card
 assets/models/          written by ../app-backend/export_onnx.py
 test/golden.ts          features + tokenizer vs Python
 test/pipeline.ts        the whole pipeline through real ONNX vs Python
 ```
+
+The pipeline itself is not here. `../core/` holds `model.ts`, `features.ts`,
+`tokenizer.ts` and `copy.ts`, shared with `../web/` so the two builds cannot drift —
+`core/model.ts` takes the ONNX runtime as an argument, which is what lets one copy run
+under React Native, WASM and Node. This folder contributes the phone's answers to
+"where do the models live" and "what does the screen look like", nothing more.
 
 ## Running it
 

@@ -8,8 +8,8 @@
  */
 import { Asset } from 'expo-asset';
 
-import type { Manifest } from './model.ts';
-import type { FeatureConfig } from './features.ts';
+import type { Manifest } from '../../core/model.ts';
+import type { FeatureConfig } from '../../core/features.ts';
 
 export const manifest = require('../assets/models/manifest.json') as Manifest;
 export const featureConfig = require('../assets/models/feature_config.json') as FeatureConfig;

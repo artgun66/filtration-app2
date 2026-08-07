@@ -2,9 +2,14 @@
  * The on-device pipeline: raw message in, verdict out.
  *
  * Mirrors app-backend/predict.py step for step. The runtime is injected rather than
- * imported, so the same code runs under onnxruntime-react-native on a phone and
- * onnxruntime-node in test/pipeline.ts -- the tests exercise the real thing instead of
- * a stand-in.
+ * imported, which is what lets one copy of this file serve three hosts:
+ * onnxruntime-react-native on a phone, onnxruntime-web in a browser, and
+ * onnxruntime-node in app/test/pipeline.ts -- so the tests exercise the real thing
+ * instead of a stand-in, and the phone and the web app cannot drift apart.
+ *
+ * Nothing here may import React, React Native, expo-* or the DOM. Loading the models
+ * is the platform's job (app/src/assets.ts, web/src/assets.ts); this file only ever
+ * receives a `resolve` function.
  */
 import { extractFeatures, keywordFlags, buildRow, type FeatureConfig } from './features.ts';
 import { encode, type Vocab } from './tokenizer.ts';
@@ -34,10 +39,18 @@ export type Verdict = {
   signals: string[];
 };
 
-/** The bits of an ONNX runtime this needs -- satisfied by both ORT packages. */
+/**
+ * The bits of an ONNX runtime this needs -- satisfied by all three ORT packages.
+ *
+ * `create` takes bytes as well as a path because the three hosts supply the model
+ * differently: react-native and node hand over a filesystem path, while the browser
+ * has already pulled the graph into a Cache API entry and has an ArrayBuffer.
+ */
+export type ModelSource = string | Uint8Array | ArrayBuffer;
+
 export interface OrtLike {
   InferenceSession: {
-    create(path: string): Promise<OrtSession>;
+    create(model: ModelSource): Promise<OrtSession>;
   };
   Tensor: new (type: string, data: never, dims: number[]) => unknown;
 }
@@ -93,7 +106,7 @@ export class Scanner {
    */
   static async create(opts: {
     ort: OrtLike;
-    resolve: (file: string) => Promise<string> | string;
+    resolve: (file: string) => Promise<ModelSource> | ModelSource;
     manifest: Manifest;
     cfg: FeatureConfig;
     vocab: Vocab;
