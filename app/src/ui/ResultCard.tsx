@@ -10,13 +10,10 @@ import { View, Text, StyleSheet } from 'react-native';
 import { C, T, S } from './theme.ts';
 import type { Verdict } from '../../../core/model.ts';
 import {
-  confidenceWord, HEADLINE, UNKNOWN_TYPE, SCAM_ADVICE, coverageCaveat, signalsHeading,
+  confidenceWord, HEADLINE, UNKNOWN_TYPE, SCAM_ADVICE, signalsHeading,
 } from '../../../core/copy.ts';
 
-export function ResultCard({ verdict, notCovered }: {
-  verdict: Verdict;
-  notCovered: string[];
-}) {
+export function ResultCard({ verdict }: { verdict: Verdict }) {
   const scam = verdict.scam;
   const fg = scam ? C.dangerFg : C.safeFg;
   const bg = scam ? C.dangerBg : C.safeBg;
@@ -55,13 +52,6 @@ export function ResultCard({ verdict, notCovered }: {
         </View>
       )}
 
-      {!scam && coverageCaveat(notCovered) && (
-        <View style={[styles.block, styles.caveat, { borderTopColor: accent }]}>
-          <Text style={[styles.caveatText, { color: fg }]}>
-            {coverageCaveat(notCovered)}
-          </Text>
-        </View>
-      )}
     </View>
   );
 }
@@ -79,6 +69,4 @@ const styles = StyleSheet.create({
   block: { gap: 6 },
   heading: { fontSize: T.body, fontWeight: '700', marginTop: 4 },
   item: { fontSize: T.body, lineHeight: 26 },
-  caveat: { borderTopWidth: 1, paddingTop: S.gap },
-  caveatText: { fontSize: T.small, lineHeight: 22 },
 });

@@ -10,11 +10,15 @@
  *   - Lead with an action, not a score. "Do not tap any links" is usable; "0.94" is
  *     not. Confidence is still shown, in words, because a verdict with no visible
  *     uncertainty invites blind trust.
- *   - Never imply coverage the model does not have. Four of the thirteen scam types
- *     have no training data, so a safe verdict says so plainly rather than reading as
- *     an all-clear.
  *   - Do not name a scam type unless the head is confident. "Not sure what kind" is a
  *     real answer and a better one than a wrong label.
+ *
+ * A safe verdict used to carry a line naming the four scam types with no training data,
+ * so that a miss did not read as an all-clear. It was removed by product decision. The
+ * standing footer in web/index.html still says the app cannot spot every kind of scam,
+ * which is now the only place a user is told so -- worth knowing before that goes too.
+ * manifest.types_not_covered is still exported and still accurate if it is ever wanted
+ * back.
  */
 import type { Verdict } from './model.ts';
 
@@ -39,18 +43,6 @@ export const SCAM_ADVICE = [
   'If it claims to be your bank or a company you use, contact them using the number on your card or their official app.',
   'Delete the message once you are done.',
 ];
-
-/**
- * The line under a safe verdict. `notCovered` comes from manifest.types_not_covered,
- * so it shrinks on its own as labeling/ fills those classes in -- it is never a
- * hardcoded list that can quietly go stale.
- */
-export function coverageCaveat(notCovered: string[]): string | null {
-  if (notCovered.length === 0) return null;
-  return `Cyber Scout cannot yet spot every kind of scam. It does not recognise ` +
-    `${notCovered.join(', ')}. If a message feels wrong, trust that feeling and ` +
-    `check with someone you know.`;
-}
 
 /** The heading above the signal list, which reads differently either way. */
 export function signalsHeading(scam: boolean): string {

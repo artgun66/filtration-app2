@@ -8,7 +8,7 @@
  */
 import type { Verdict } from '../../core/model.ts';
 import {
-  confidenceWord, HEADLINE, UNKNOWN_TYPE, SCAM_ADVICE, coverageCaveat, signalsHeading,
+  confidenceWord, HEADLINE, UNKNOWN_TYPE, SCAM_ADVICE, signalsHeading,
 } from '../../core/copy.ts';
 
 function el<K extends keyof HTMLElementTagNameMap>(
@@ -29,7 +29,7 @@ function bulletList(items: string[], heading: string): HTMLElement {
   return block;
 }
 
-export function resultCard(verdict: Verdict, notCovered: string[]): HTMLElement {
+export function resultCard(verdict: Verdict): HTMLElement {
   const card = el('section', `card ${verdict.scam ? 'danger' : 'safe'}`);
   card.setAttribute('role', 'status');
   // Assertive rather than polite: the person asked a direct question and is waiting on
@@ -48,12 +48,6 @@ export function resultCard(verdict: Verdict, notCovered: string[]): HTMLElement 
     card.append(bulletList(verdict.signals, signalsHeading(verdict.scam)));
   }
 
-  const caveat = verdict.scam ? null : coverageCaveat(notCovered);
-  if (caveat) {
-    const block = el('div', 'block caveat');
-    block.append(el('p', 'caveat-text', caveat));
-    card.append(block);
-  }
   return card;
 }
 

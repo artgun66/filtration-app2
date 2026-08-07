@@ -100,8 +100,6 @@ button:disabled { background: var(--muted); cursor: default; }
 .heading { font-size: var(--body); font-weight: 700; margin: 4px 0 0; }
 .items { margin: 0; padding-left: 1.2em; }
 .items li { margin-bottom: 6px; line-height: 26px; }
-.caveat { border-top: 1px solid currentColor; padding-top: var(--gap); }
-.caveat-text { font-size: var(--small); line-height: 22px; margin: 0; opacity: 0.9; }
 
 .bar {
   height: 14px;

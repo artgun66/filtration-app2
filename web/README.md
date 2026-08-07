@@ -96,6 +96,16 @@ file at 25 MB, so it usually cannot sit next to the app:
 VITE_MODEL_BASE=https://huggingface.co/<user>/<repo>/resolve/main npm run build
 ```
 
+Setting it changes what the build contains, not just where it points:
+
+| | `dist/` | goes to |
+|---|---|---|
+| default | 100 MB | one host that accepts an 86 MB file |
+| `VITE_MODEL_BASE` set | **13 MB** | any static host; models live at that URL |
+
+The models are dropped from the build rather than shipped and ignored — otherwise the
+deploy carries 87 MB nothing requests, and fails outright on a host with a file cap.
+
 Hugging Face is free, built for model files and sends CORS headers. GitHub Pages can
 host the 86 MB file directly (100 MB per-file limit) but it is an unhappy fit for a
 git repo. Set `VITE_BASE=/repo-name/` for a GitHub Pages project site.

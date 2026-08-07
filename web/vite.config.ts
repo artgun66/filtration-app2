@@ -1,3 +1,7 @@
+import { rm } from 'node:fs/promises';
+import { resolve } from 'node:path';
+
+import type { Plugin } from 'vite';
 import { defineConfig } from 'vite';
 
 // Deployed under a subpath (GitHub Pages project sites) as often as at a domain root,
@@ -9,8 +13,30 @@ const base = process.env.VITE_BASE ?? '/';
 // public/ and point env.wasm.wasmPaths at it: ORT `import()`s its Emscripten glue as a
 // module, and Vite will not serve public/ as source, so the dev server dies on load.
 
+/**
+ * Keep the models out of dist/ when they are served from somewhere else.
+ *
+ * scripts/prepare-assets.mjs already skips *staging* them under VITE_MODEL_BASE, but
+ * a public/models left over from a previous dev run is still copied verbatim by Vite.
+ * That silently puts 87 MB of never-requested files into the deploy -- and fails the
+ * upload outright on a host with a per-file cap, which is the whole reason the models
+ * are hosted elsewhere.
+ */
+function dropUnusedModels(): Plugin {
+  return {
+    name: 'drop-unused-models',
+    apply: 'build',
+    async closeBundle() {
+      if (!process.env.VITE_MODEL_BASE) return;
+      await rm(resolve(__dirname, 'dist', 'models'), { recursive: true, force: true });
+      this.info?.('removed dist/models -- served from VITE_MODEL_BASE');
+    },
+  };
+}
+
 export default defineConfig({
   base,
+  plugins: [dropUnusedModels()],
   optimizeDeps: {
     // Dev only, and load-bearing. Vite normally pre-bundles dependencies into
     // node_modules/.vite/deps/, which rewrites import.meta.url -- so ORT's

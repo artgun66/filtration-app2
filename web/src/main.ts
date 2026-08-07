@@ -76,7 +76,7 @@ form.addEventListener('submit', async (ev) => {
   try {
     const scanner = await ready;
     const verdict: Verdict = await scanner.scan(text);
-    show(resultCard(verdict, scanner.manifest.types_not_covered));
+    show(resultCard(verdict));
   } catch (err) {
     console.error(err);
     show(errorPanel(err));

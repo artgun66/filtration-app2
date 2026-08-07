@@ -148,7 +148,7 @@ export default function App() {
         )}
 
         {verdict && (
-          <ResultCard verdict={verdict} notCovered={manifest.types_not_covered} />
+          <ResultCard verdict={verdict} />
         )}
       </ScrollView>
     </KeyboardAvoidingView>

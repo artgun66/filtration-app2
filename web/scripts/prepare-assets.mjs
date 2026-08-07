@@ -55,4 +55,11 @@ function stage(src, dstDir, names, label) {
               `${names.length - copied} already current)`);
 }
 
-stage(MODELS_SRC, join(WEB, 'public', 'models'), MODELS, 'models');
+// With the models hosted elsewhere -- which is the normal deploy, since 86 MB exceeds
+// what several static hosts will take -- copying them into public/ would ship 87 MB of
+// files nothing ever requests, and fail the upload on a host with a per-file cap.
+if (process.env.VITE_MODEL_BASE) {
+  console.log(`models: served from ${process.env.VITE_MODEL_BASE}, not staged`);
+} else {
+  stage(MODELS_SRC, join(WEB, 'public', 'models'), MODELS, 'models');
+}
