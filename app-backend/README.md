@@ -59,10 +59,17 @@ what the phone will say.
 
 ## Extending the scam-type head
 
-`distill.py --train` uses the 694 SmishTank rows that carry a usable type. Eight of
-the plan's thirteen types have data; family emergency, charity, Medicare and health
-and utility shutoff have none, so the head cannot learn them and returns `null`
-instead of guessing.
+`distill.py --train` uses 764 rows: the SmishTank rows that carry a usable type, with
+136 labels corrected from `../labeling/categorized_261.csv`. Most of the gain is rows
+rescued out of the excluded `other` bucket, and it is worth 0.775 → 0.838 accuracy
+(`--compare` scores both on the same held-out rows).
+
+Those corrections are classifier-assigned, not blind annotation, so the number measures
+agreement with a better labeller rather than correctness — see `../labeling/README.md`.
+
+Eight of the plan's thirteen types have enough data to learn. Family emergency and
+charity have no rows at all, Medicare/health and utility shutoff have three each; all
+four are listed in `DEFERRED` and the head returns `null` instead of guessing.
 
 `distill.py --pseudo-label --limit N` extends coverage by running the 3B teacher over
 untyped scam rows (~2.9 s each, so 4,000 rows is about 3 hours). It is resumable —

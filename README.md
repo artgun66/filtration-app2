@@ -269,10 +269,13 @@ Operating points for the best model:
   `Reply STOP` to mark legitimate marketing that scammers skip. Measured, it fires on
   3.2% of smishing versus 0.4% of advertisement spam — scammers mimic it. Still a useful
   feature, just with the sign reversed.
-* **Scam-type labels were mostly already there.** The plan assumed hand-labelling from
-  scratch; SmishTank supplied 1,055 categorised messages covering 10 of 13 types.
-  Family emergency, charity and Medicare/health have **no** examples and utility shutoff
-  has one — those still need hand-labelling before stage 2 can be scored on them.
+* **Scam-type labels were mostly already there, but wrong more often than expected.** The
+  plan assumed hand-labelling from scratch; SmishTank supplied 1,055 categorised messages
+  covering 10 of 13 types. A correction pass over the 261 rows in `labeling/` disagreed
+  with the derived label on **136 of them** — the IRS-under-crypto bug and the 98-row
+  brand-map fallback — and fixing those moves the type head from 0.775 to 0.838 accuracy.
+  Family emergency and charity still have **no** examples and Medicare/health and utility
+  shutoff have three each; no relabelling reaches those, only sourcing new messages.
 * **The 95% recall target does not survive validation → test.** Six of seven arms fitted
   to exactly 95% recall on validation landed *below* it on test (0.896–0.955). That is
   the expected behaviour of picking the tightest threshold that just clears a bar, given

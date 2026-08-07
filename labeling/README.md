@@ -29,6 +29,32 @@ These files replace the mapping with annotation for the rows where it matters mo
 | `type_guide.md` | — | The rules. Keep it open; see below. |
 | `answer_key.csv` | 340 | Mapped label + model prediction, joined by `id`. **Do not open until you are done.** |
 | `build_labeling_sets.py` | — | Regenerates all of the above. Seeded 200, so it reproduces exactly. |
+| `Sorted.numbers` | 340 | The categorisation pass, as received. Source artifact — read, not edited. |
+| `categorized_261.csv` | 261 | Extracted from it, repaired. **Feeds the type head.** |
+| `extract_categorized.py` | — | Does that extraction, and documents the three repairs. |
+
+## The categorisation pass
+
+`categorized_261.csv` is a first pass over the 261 rows that have text, and it is worth
+being precise about what it is: per the workbook's own note, categories were assigned by
+a **keyword/pattern classifier followed by a manual review of everything left in
+`Other`**. That is not the blind annotation this file asks for below.
+
+It is still a large improvement. It disagrees with `scam_type` on **136 of 261 rows**,
+and the disagreements are exactly the two bugs listed above — the IRS rows filed under
+`investment and crypto`, and all 98 that fell through the brand map. Feeding it to
+`app-backend/distill.py` moves the type head from 0.775 to 0.838 accuracy and 0.710 to
+0.784 macro-F1, scored on the same held-out rows.
+
+What it does **not** do is settle anything. A head trained on classifier output partly
+learns to imitate that classifier, and accuracy measured against those same labels
+cannot see a mistake they share. The blind pass is still the thing that produces a
+number you can publish, and the self-agreement check below is still the only route to
+knowing what the ceiling is.
+
+Nor does it add coverage. All 79 `NEEDS_SOURCING` rows are still empty — charity and
+family emergency have zero messages, Medicare/health and utility shutoff have three
+each. Those four types are deferred in `distill.py` rather than half-learnt.
 
 Both sets are shuffled — labelling 180 delivery messages in a row turns into
 pattern-matching on position instead of content.
