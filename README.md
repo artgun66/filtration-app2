@@ -21,7 +21,7 @@ not the written explanation the LLM was there to produce.
 | stage 1 | `qwen_feat_clean`, 0.6B encoder, ~600 MB | `minilm_feat`, 22M encoder, 90 MB |
 | recall @ precision 0.90 | 0.944 | 0.938 |
 | stage 2 | Qwen2.5-3B, 2.9 s/message | linear head, ~5K parameters |
-| stage 2 accuracy | 0.702 | 0.838 |
+| stage 2 accuracy | 0.702 | 0.817 |
 
 Stage 2's row is not a typo: the 5K-parameter head beats the 3B LLM it replaces, scored
 on the same held-out rows against the same corrected labels (`distill.py --vs-teacher`).
@@ -310,7 +310,7 @@ Operating points for the best model:
   plan assumed hand-labelling from scratch; SmishTank supplied 1,055 categorised messages
   covering 10 of 13 types. A correction pass over the 261 rows in `labeling/` disagreed
   with the derived label on **136 of them** — the IRS-under-crypto bug and the 98-row
-  brand-map fallback — and fixing those moves the type head from 0.775 to 0.838 accuracy.
+  brand-map fallback — and fixing those moves the type head from 0.805 to 0.830 accuracy.
   Family emergency and charity still have **no** examples and Medicare/health and utility
   shutoff have three each; no relabelling reaches those, only sourcing new messages.
 * **The 95% recall target does not survive validation → test.** Six of seven arms fitted

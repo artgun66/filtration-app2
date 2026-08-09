@@ -22,8 +22,8 @@ type, and they come from SmishTank's own categories:
 is 764 rows rather than 695. Two thirds of the gain is rows rescued out of `other`:
 
                        mapping   corrected     both scored on the same held-out rows
-  accuracy               0.775       0.838
-  macro-F1               0.710       0.784
+  accuracy               0.805       0.830
+  macro-F1               0.752       0.769
 
 `other` itself stays excluded. Per labeling/README.md it is 262 genuine
 advertisement/loan rows plus 98 that fell through the brand map -- 27% contaminated --
@@ -298,10 +298,16 @@ def vs_teacher(arm, seed=M.SEED):
     tr, te = _held_out(df, arm, seed)
 
     ev = pd.read_csv(TEACHER_EVAL)
-    text_to_id = dict(zip(df["text"].astype(str), df["id"]))
-    ev["id"] = ev["text"].astype(str).map(text_to_id)
-    joined = ev["id"].notna().sum()
-    print(f"teacher rows {len(ev)}, joined to the corpus by text: {joined}")
+    if "id" in ev.columns:
+        print(f"teacher rows {len(ev)}, keyed by id")
+    else:
+        # Runs written before scam_type_prompt.py kept the id. Recoverable, but the
+        # join is fragile enough that scam-type-classification/backfill_ids.py exists
+        # to do it once rather than here on every call.
+        text_to_id = dict(zip(df["text"].astype(str), df["id"]))
+        ev["id"] = ev["text"].astype(str).map(text_to_id)
+        print(f"teacher rows {len(ev)}, joined by text: {ev['id'].notna().sum()} "
+              f"(run backfill_ids.py to key these by id)")
 
     truth = dict(zip(te["id"], te["type"]))
     # The teacher was never offered "not a scam", so rows of that class would score it

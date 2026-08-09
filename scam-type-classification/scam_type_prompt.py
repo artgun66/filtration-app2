@@ -274,7 +274,10 @@ def main():
         return
 
     truth = sample["scam_type"].tolist()
-    cmp = pd.DataFrame({"true": truth, "pred": pred})
+    # id first: without it every consumer has to join these rows back to the corpus on
+    # message text, which is fragile (duplicates, truncation, encoding) and was how
+    # app-backend/distill.py --vs-teacher had to work until this was fixed.
+    cmp = pd.DataFrame({"id": sample["id"].values, "true": truth, "pred": pred})
     print(f"overall accuracy      : {(cmp.true == cmp.pred).mean():.3f}")
     known = cmp[cmp.true != ST.OTHER]
     print(f"accuracy excluding 'other' truth: {(known.true == known.pred).mean():.3f} "

@@ -43,8 +43,8 @@ a **keyword/pattern classifier followed by a manual review of everything left in
 It is still a large improvement. It disagrees with `scam_type` on **136 of 261 rows**,
 and the disagreements are exactly the two bugs listed above — the IRS rows filed under
 `investment and crypto`, and all 98 that fell through the brand map. Feeding it to
-`app-backend/distill.py` moves the type head from 0.775 to 0.838 accuracy and 0.710 to
-0.784 macro-F1, scored on the same held-out rows.
+`app-backend/distill.py` moves the type head from 0.805 to 0.830 accuracy and 0.752 to
+0.769 macro-F1, scored on the same held-out rows.
 
 What it does **not** do is settle anything. A head trained on classifier output partly
 learns to imitate that classifier, and accuracy measured against those same labels

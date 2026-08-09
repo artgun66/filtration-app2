@@ -59,18 +59,19 @@ what the phone will say.
 
 ## Extending the scam-type head
 
-`distill.py --train` uses 764 rows: the SmishTank rows that carry a usable type, with
-136 labels corrected from `../labeling/categorized_261.csv`. Most of the gain is rows
-rescued out of the excluded `other` bucket, and it is worth 0.775 → 0.838 accuracy
-(`--compare` scores both on the same held-out rows).
+`distill.py --train` uses 964 rows: the SmishTank rows that carry a usable type, 136
+labels corrected from `../labeling/categorized_261.csv`, and 200 ham rows for
+`not a scam`. Most of the correction gain is rows rescued out of the excluded `other`
+bucket, and it is worth 0.805 → 0.830 accuracy (`--compare` scores both on the same
+held-out rows).
 
 Those corrections are classifier-assigned, not blind annotation, so the number measures
 agreement with a better labeller rather than correctness — see `../labeling/README.md`.
 
 `--vs-teacher` settles the question the head exists to answer. Scored on the same
-held-out rows against the same corrected labels, the 3B teacher gets 0.702 / 0.618
-macro-F1 and the head 0.838 / 0.784. The published 0.742 was measured against the
-uncorrected mapping and is not comparable to either.
+held-out scam rows against the same corrected labels, the 3B teacher gets 0.702
+accuracy / 0.618 macro-F1 and the head 0.817 / 0.775. The published 0.742 was measured
+against the uncorrected mapping and is not comparable to either.
 
 Eight of the plan's thirteen types have enough data to learn. Family emergency and
 charity have no rows at all, Medicare/health and utility shutoff have three each; all
