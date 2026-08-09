@@ -32,6 +32,30 @@ These files replace the mapping with annotation for the rows where it matters mo
 | `Sorted.numbers` | 340 | The categorisation pass, as received. Source artifact — read, not edited. |
 | `categorized_261.csv` | 261 | Extracted from it, repaired. **Feeds the type head.** |
 | `extract_categorized.py` | — | Does that extraction, and documents the three repairs. |
+| `test_unlabelled.csv` | 188 | Blind. The **test-split** rows stage 2 sees. |
+| `test_unlabelled_key.csv` | 188 | Their split, true scam flag and stage-1 score. **Do not open first.** |
+| `build_test_set.py` | — | Regenerates both. |
+
+## The test set, and why it is separate
+
+Every stage-2 number in this project is measured on the type head's own split, and that
+pool is **26% test rows already** — so there is no honest end-to-end figure for both
+stages on held-out data, and there cannot be until the head stops training on test rows.
+
+`test_unlabelled.csv` is the fix. Of 10,120 test rows only 199 carry a type; labelling
+all 9,921 others is absurd, so it takes the population stage 2 actually meets:
+
+| | rows | why |
+|---|---|---|
+| true scam, flagged | 144 | stage 2 sees these |
+| ham, flagged | 33 | stage 2 sees these too, and should answer `not a scam` |
+| true scam, missed | 11 | stage 1's misses, so recall keeps an honest denominator |
+
+Those 33 also close a hole in `scam-classification/type_metrics.py`: ham has no
+`scam_type_true`, so the `not a scam` class cannot currently be scored from the corpus
+columns at all.
+
+Label these, retrain excluding them, and stage 2 has a number worth publishing.
 
 ## The categorisation pass
 

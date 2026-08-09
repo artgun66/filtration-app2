@@ -1,0 +1,26 @@
+split,scope,scam_type,n_true,n_pred,tp,fp,fn,precision,recall,f1
+heldout,all rows,bank alert,75,69,61,8,14,0.8841,0.8133,0.8472
+heldout,all rows,delivery and toll,80,79,78,1,2,0.9873,0.975,0.9811
+heldout,all rows,government impersonation,43,46,37,9,6,0.8043,0.8605,0.8315
+heldout,all rows,investment and crypto,13,31,13,18,0,0.4194,1.0,0.5909
+heldout,all rows,job offer,8,10,8,2,0,0.8,1.0,0.8889
+heldout,all rows,medicare and health,2,0,0,0,2,0.0,0.0,0.0
+heldout,all rows,not a scam,0,11,0,11,0,0.0,0.0,0.0
+heldout,all rows,other,102,0,0,0,102,0.0,0.0,0.0
+heldout,all rows,prize and lottery,29,71,28,43,1,0.3944,0.9655,0.56
+heldout,all rows,romance,17,46,17,29,0,0.3696,1.0,0.5397
+heldout,all rows,tech support,33,40,29,11,4,0.725,0.8788,0.7945
+heldout,all rows,utility shutoff,1,0,0,0,1,0.0,0.0,0.0
+heldout,all rows,MACRO AVG,403,403,271,132,132,0.4487,0.6244,0.5028
+heldout,all rows,WEIGHTED AVG,403,806,542,264,264,0.5791,0.6725,0.606
+heldout,learnable only,bank alert,75,65,61,4,14,0.9385,0.8133,0.8714
+heldout,learnable only,delivery and toll,80,78,78,0,2,1.0,0.975,0.9873
+heldout,learnable only,government impersonation,43,38,37,1,6,0.9737,0.8605,0.9136
+heldout,learnable only,investment and crypto,13,17,13,4,0,0.7647,1.0,0.8667
+heldout,learnable only,job offer,8,8,8,0,0,1.0,1.0,1.0
+heldout,learnable only,not a scam,0,6,0,6,0,0.0,0.0,0.0
+heldout,learnable only,prize and lottery,29,30,28,2,1,0.9333,0.9655,0.9492
+heldout,learnable only,romance,17,18,17,1,0,0.9444,1.0,0.9714
+heldout,learnable only,tech support,33,38,29,9,4,0.7632,0.8788,0.8169
+heldout,learnable only,MACRO AVG,298,298,271,27,27,0.8131,0.8326,0.8196
+heldout,learnable only,WEIGHTED AVG,298,596,542,54,54,0.9346,0.9094,0.9191
