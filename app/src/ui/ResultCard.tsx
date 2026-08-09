@@ -10,7 +10,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { C, T, S } from './theme.ts';
 import type { Verdict } from '../../../core/model.ts';
 import {
-  confidenceWord, HEADLINE, UNKNOWN_TYPE, SCAM_ADVICE, signalsHeading,
+  confidenceWord, HEADLINE, UNKNOWN_TYPE, SCAM_ADVICE, FALSE_ALARM, signalsHeading,
 } from '../../../core/copy.ts';
 
 export function ResultCard({ verdict }: { verdict: Verdict }) {
@@ -30,10 +30,16 @@ export function ResultCard({ verdict }: { verdict: Verdict }) {
         {verdict.type ? ` · ${verdict.type}` : ''}
       </Text>
 
-      {scam && !verdict.type && (
+      {verdict.falseAlarm && (
+        <Text style={[styles.note, { color: fg }]}>{FALSE_ALARM}</Text>
+      )}
+
+      {!verdict.falseAlarm && scam && !verdict.type && (
         <Text style={[styles.note, { color: fg }]}>{UNKNOWN_TYPE}</Text>
       )}
 
+      {/* Advice still shows on a suspected false alarm: not tapping the link costs
+          nothing if the message turns out to be genuine. */}
       {scam && (
         <View style={styles.block}>
           <Text style={[styles.heading, { color: fg }]}>What to do</Text>

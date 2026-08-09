@@ -7,8 +7,9 @@
  * more than usual here because the model already costs 86 MB.
  */
 import type { Verdict } from '../../core/model.ts';
+import type { StorageState } from './assets.ts';
 import {
-  confidenceWord, HEADLINE, UNKNOWN_TYPE, SCAM_ADVICE, signalsHeading,
+  confidenceWord, HEADLINE, UNKNOWN_TYPE, SCAM_ADVICE, FALSE_ALARM, signalsHeading,
 } from '../../core/copy.ts';
 
 function el<K extends keyof HTMLElementTagNameMap>(
@@ -42,7 +43,10 @@ export function resultCard(verdict: Verdict): HTMLElement {
   card.append(el('p', 'confidence',
                  confidenceWord(verdict.prob, verdict.scam) + kind));
 
-  if (verdict.scam && !verdict.type) card.append(el('p', 'note', UNKNOWN_TYPE));
+  if (verdict.falseAlarm) card.append(el('p', 'note', FALSE_ALARM));
+  else if (verdict.scam && !verdict.type) card.append(el('p', 'note', UNKNOWN_TYPE));
+  // The advice still shows on a suspected false alarm: not tapping the link costs
+  // nothing if the message turns out to be genuine.
   if (verdict.scam) card.append(bulletList(SCAM_ADVICE, 'What to do'));
   if (verdict.signals.length) {
     card.append(bulletList(verdict.signals, signalsHeading(verdict.scam)));
@@ -51,21 +55,42 @@ export function resultCard(verdict: Verdict): HTMLElement {
   return card;
 }
 
-/** The first-run download. 86 MB is long enough that silence reads as breakage. */
-export function progressPanel(): {
+/**
+ * The loading screen. 86 MB is long enough that silence reads as breakage -- but a
+ * progress bar on a load that is coming from local storage reads as a *re-download*,
+ * which is worse: it makes working caching look broken. So the bar is shown only when
+ * bytes are actually coming over the network.
+ */
+export function progressPanel(state: StorageState): {
   node: HTMLElement; update: (file: string, got: number, total: number) => void;
 } {
+  const downloading = state !== 'stored';
   const node = el('section', 'card loading');
-  const title = el('h1', 'verdict', 'Getting Cyber Scout ready');
-  const detail = el('p', 'confidence', 'This happens once. Please stay on this screen.');
+  const title = el('h1', 'verdict',
+                   downloading ? 'Getting Cyber Scout ready' : 'Starting Cyber Scout');
+  const detail = el('p', 'confidence', downloading
+    ? 'This downloads once, then it is kept on your device.'
+    : 'Loading from your device.');
+  node.append(title, detail);
+
   const bar = el('div', 'bar');
   const fill = el('div', 'bar-fill');
-  bar.append(fill);
-  bar.setAttribute('role', 'progressbar');
-  bar.setAttribute('aria-valuemin', '0');
-  bar.setAttribute('aria-valuemax', '100');
   const pct = el('p', 'note', '');
-  node.append(title, detail, bar, pct);
+  if (downloading) {
+    bar.append(fill);
+    bar.setAttribute('role', 'progressbar');
+    bar.setAttribute('aria-valuemin', '0');
+    bar.setAttribute('aria-valuemax', '100');
+    node.append(bar, pct);
+  }
+
+  // Storage that does not work is invisible otherwise -- it just looks like the app is
+  // slow every time. Private browsing is the usual cause.
+  if (state === 'unavailable') {
+    node.append(el('p', 'note',
+      'Your browser will not let Cyber Scout save the file, so it has to download ' +
+      'each time. Private browsing is the usual reason.'));
+  }
 
   // Progress is reported per file, but the encoder is 99% of the bytes -- so a naive
   // per-file bar would sit at 0% for a minute and then jump. Weighting by size keeps
@@ -74,6 +99,7 @@ export function progressPanel(): {
   return {
     node,
     update(file, got, total) {
+      if (!downloading) return;
       seen.set(file, { got, total });
       let g = 0;
       let t = 0;

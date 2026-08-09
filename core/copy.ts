@@ -37,6 +37,18 @@ export const HEADLINE = {
 
 export const UNKNOWN_TYPE = 'Not sure what kind of scam it is.';
 
+/**
+ * Shown when the type head disagrees with the verdict above it.
+ *
+ * Deliberately does not say "this is safe". The two models are not equals: stage 1
+ * scores AUC 0.996 and the type head 0.83, and measured on held-out rows the type head
+ * calls 6 in 191 genuine scams a false alarm. So this softens, it does not overturn --
+ * and it still ends on the cautious instruction, because a reader who takes only the
+ * last clause should still be careful.
+ */
+export const FALSE_ALARM =
+  'Our second check thinks this one may be a false alarm. Be careful with it anyway.';
+
 export const SCAM_ADVICE = [
   'Do not tap any links in the message.',
   'Do not reply, and do not call any number it gives.',
@@ -53,5 +65,6 @@ export function signalsHeading(scam: boolean): string {
 export function summarise(v: Verdict): string {
   const head = v.scam ? HEADLINE.scam : HEADLINE.safe;
   const kind = v.scam && v.type ? ` (${v.type})` : '';
-  return `${head}${kind} -- ${confidenceWord(v.prob, v.scam).toLowerCase()}`;
+  const doubt = v.falseAlarm ? ', possibly a false alarm' : '';
+  return `${head}${kind}${doubt} -- ${confidenceWord(v.prob, v.scam).toLowerCase()}`;
 }

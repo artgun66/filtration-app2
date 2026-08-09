@@ -76,6 +76,30 @@ Eight of the plan's thirteen types have enough data to learn. Family emergency a
 charity have no rows at all, Medicare/health and utility shutoff have three each; all
 four are listed in `DEFERRED` and the head returns `null` instead of guessing.
 
+## `not a scam`
+
+A ninth class, and the only one whose training rows are ham. The head runs *only* on
+messages stage 1 has already flagged, so before this it had no way to say "the filter
+was wrong" — a false positive had to be forced into a scam category, and the app named
+a kind of scam for a message that was not one.
+
+It is trained on the **200 ham rows stage 1 scores highest**, not on random ham. That
+matters: stage 1 reaches 1.000 accuracy on its own training split, so every train-split
+ham row sits at p≈0.000 and is trivially separable. The hard rows — its actual false
+positives — live in val and test. `--ham-cost` prices the trade:
+
+| | scam-type accuracy | genuine scams called `not a scam` |
+|---|---|---|
+| without the class | 0.822 | 0 / 191 |
+| with it | 0.817 | 6 / 191 |
+
+For that it gets precision 0.88 and recall 0.88 on 50 held-out ham rows.
+
+It **does not overturn stage 1**. The manifest exports the class name as
+`type_not_scam`, the app never renders it as a scam type, and the verdict stands —
+stage 1 is AUC 0.996 against this head's 0.83, and trading a loud false alarm for a
+silent miss is the wrong direction for this audience.
+
 `distill.py --pseudo-label --limit N` extends coverage by running the 3B teacher over
 untyped scam rows (~2.9 s each, so 4,000 rows is about 3 hours). It is resumable —
 ids already in `results/pseudo_labels.csv` are skipped. Then

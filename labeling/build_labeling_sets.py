@@ -28,7 +28,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 
-from dataset.scam_types import BRAND_DECIDES, SCAM_TYPES, OTHER  # noqa: E402
+from dataset.scam_types import BRAND_DECIDES, SCAM_ONLY_TYPES, OTHER  # noqa: E402
 
 DATASET = os.path.join(ROOT, "dataset", "combined_sms_dataset.csv")
 EVAL = os.path.join(ROOT, "scam-type-classification", "results",
@@ -94,7 +94,9 @@ def load_model_preds():
 
 def build_pools(rows):
     """Split the corpus into one pool per bucket, in a fixed order."""
-    pools = {t: [] for t in SCAM_TYPES}
+    # SCAM_ONLY_TYPES: `not a scam` is a stage-2 class trained on ham, not something a
+    # human labels a flagged message as, so it gets no pool and no sourcing work order.
+    pools = {t: [] for t in SCAM_ONLY_TYPES}
     pools["__fallback__"] = []
     for r in rows:
         cat = r["category"].strip().lower()

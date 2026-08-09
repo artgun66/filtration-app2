@@ -34,6 +34,7 @@ import run_arms as R                            # noqa: E402
 from dataset import features as F               # noqa: E402
 from dataset import keywords as K               # noqa: E402
 import predict as P                             # noqa: E402
+import distill as D                             # noqa: E402
 
 ASSETS = os.path.join(ROOT, "app", "assets", "models")
 N_GOLDEN = 200
@@ -262,6 +263,12 @@ def main():
             "feature_labels": F.FEATURE_LABELS,
             "type_classes": classes,
             "type_min_conf": 0.35,
+            # Not a scam type: the head's answer for a stage-1 false positive. Named
+            # here rather than hardcoded in the app so renaming it in
+            # dataset/scam_types.yaml cannot leave the UI matching a string that no
+            # longer exists -- which would fail silently, by showing "not a scam" to
+            # the user as though it were a kind of scam.
+            "type_not_scam": D.NOT_SCAM,
             # The app must say so rather than silently mislabel: these have no
             # training rows at all. See labeling/README.md.
             "types_not_covered": ["family emergency", "charity",

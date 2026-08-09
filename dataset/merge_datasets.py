@@ -395,10 +395,13 @@ lines.append(f"  largest group          : {biggest:>7,} rows")
 lines.append("")
 st = collections.Counter(r["scam_type"] for r in out if r["scam_type"])
 lines.append(f"Rows with a scam_type    : {sum(st.values()):>7,}")
-for t in scam_types.SCAM_TYPES:
+# SCAM_ONLY_TYPES, not SCAM_TYPES: `not a scam` is trained on ham by
+# app-backend/distill.py and no row here can carry it, so counting it would report a
+# permanent zero as a gap to hand-label.
+for t in scam_types.SCAM_ONLY_TYPES:
     if st[t]:
         lines.append(f"    {t:<26} {st[t]:>5,}")
-missing = [t for t in scam_types.SCAM_TYPES if not st[t]]
+missing = [t for t in scam_types.SCAM_ONLY_TYPES if not st[t]]
 if missing:
     lines.append(f"  no examples yet: {', '.join(missing)}")
 lines.append("")

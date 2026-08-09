@@ -1,11 +1,11 @@
 /**
  * Offline support for the shell. The models are deliberately not its problem.
  *
- * src/assets.ts already stores the graphs in its own Cache API bucket, keyed by URL and
- * streamed with a progress bar. If this worker also cached /models/ the browser would
- * hold two copies of an 86 MB file, which on iOS is a fast route to being evicted for
- * using too much space. So model requests are passed straight through and the worker
- * only looks after the things that make the page open at all.
+ * src/assets.ts already stores the graphs in IndexedDB, keyed by URL and streamed with
+ * a progress bar. If this worker also cached /models/ the browser would hold two copies
+ * of an 86 MB file, which on iOS is a fast route to being evicted for using too much
+ * space. So model requests are passed straight through and the worker only looks after
+ * the things that make the page open at all.
  *
  * Runtime caching rather than a precache list, because Vite fingerprints its output and
  * a hand-maintained list of hashed filenames goes stale silently.

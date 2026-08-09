@@ -527,11 +527,13 @@
     "government impersonation",
     "investment and crypto",
     "job offer",
+    "not a scam",
     "prize and lottery",
     "romance",
     "tech support"
   ],
   "type_min_conf": 0.35,
+  "type_not_scam": "not a scam",
   "types_not_covered": [
     "family emergency",
     "charity",

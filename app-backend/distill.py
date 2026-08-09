@@ -35,6 +35,21 @@ emergency have no rows anywhere in the corpus, Medicare/health and utility shuto
 three each. A classifier cannot learn a class it has never seen, so the head covers
 eight types and returns None elsewhere rather than guessing. Only labeling/'s 79
 NEEDS_SOURCING work orders can change that -- no amount of relabelling will.
+
+A ninth class, `not a scam`, is the answer for a stage-1 false positive. The head only
+ever runs on messages stage 1 flagged, so without it every false positive had to be
+forced into a scam category and the app named a kind of scam for a message that was not
+one. Trained on the 200 ham rows stage 1 scores highest, not on random ham -- see
+hardest_ham. It costs a little on the real types, which `--ham-cost` measures:
+
+                              scam-type accuracy   genuine scams called `not a scam`
+  without the class                    0.822                       0/191
+  with it                              0.817                       6/191
+
+and it earns precision 0.88 / recall 0.88 on 50 held-out ham rows. It does not overturn
+stage 1 -- the app treats it as a second opinion, because stage 1 is AUC 0.996 against
+this head's 0.83 and trading a loud false alarm for a silent miss is the wrong
+direction for this audience.
 """
 import argparse, os, pickle, sys
 
@@ -63,6 +78,19 @@ MIN_PER_CLASS = 10           # below this a class cannot be evaluated, let alone
 # teacher output alone. labeling/'s 79 NEEDS_SOURCING work orders are what lifts them.
 DEFERRED = {"family emergency", "charity", "medicare and health", "utility shutoff"}
 
+# The answer for when stage 1 was wrong. Without it the head only knows scam types, so
+# a false positive has to be forced into one and the app names a kind of scam for a
+# message that is not one.
+NOT_SCAM = "not a scam"
+
+# How many ham rows to train it on, taken by descending stage-1 probability rather than
+# at random. The head only ever runs on messages stage 1 already flagged, so the only
+# ham it will meet in service is high-scoring ham. Random ham sits at p=0.000, is
+# trivially separable, and would teach the head nothing about the rows that matter.
+# 200 is chosen to sit alongside the largest real class (delivery and toll, 186) rather
+# than dominate the head.
+HAM_ROWS = 200
+
 
 def head_path(arm):
     return os.path.join(M.RESULTS, f"type_head_{arm}.pkl")
@@ -83,6 +111,45 @@ def corrected_types():
     return dict(zip(c["id"].astype(str), c["category"].astype(str)))
 
 
+_MATRIX = {}
+
+
+def stage1_matrix(df, arm):
+    """(X, names) for every row, memoised -- rebuilding it costs an embedding load."""
+    if arm not in _MATRIX:
+        _MATRIX[arm] = R.feature_matrix(arm, df, df["id"].to_numpy())
+    return _MATRIX[arm]
+
+
+def hardest_ham(df, arm, n=HAM_ROWS, quiet=False):
+    """The n ham rows stage 1 scores highest -- its false positives and near misses.
+
+    Note where these come from. Stage 1 reaches 1.000 accuracy on its own training
+    split, so every train-split ham row scores ~0 and none of them are hard. The rows
+    returned here are therefore almost entirely val and test. That is not leakage for
+    this head -- it is a different model on a different task, and it gets its own
+    train/test split below -- but it does mean the class is built from stage 1's
+    held-out mistakes, which is exactly the population it has to answer for.
+    """
+    path = os.path.join(M.RESULTS, f"model_{arm}.pkl")
+    if not os.path.exists(path):
+        raise SystemExit(f"no {path} -- run: python run_arms.py --arms {arm}")
+    with open(path, "rb") as fh:
+        stage1 = pickle.load(fh)["model"]
+
+    X, _ = stage1_matrix(df, arm)
+    p = stage1.predict_proba(X)[:, 1]
+    ham = (df["scam"].to_numpy() == 0)
+    order = np.argsort(-np.where(ham, p, -np.inf))[:n]
+    if not quiet:
+        from annotate import threshold_for
+        above = int((p[order] >= threshold_for(arm)).sum())
+        print(f"{n} hardest ham rows as '{NOT_SCAM}': stage-1 p from "
+              f"{p[order].max():.3f} down to {p[order].min():.3f}, "
+              f"{above} of them actual false positives")
+    return df["id"].to_numpy()[order]
+
+
 def usable(frame, quiet=False):
     """Drop what cannot be trained on: the excluded buckets, then the thin classes."""
     frame = frame[~frame["type"].isin(EXCLUDE | DEFERRED)]
@@ -94,7 +161,8 @@ def usable(frame, quiet=False):
     return frame[frame["type"].isin(counts[counts >= MIN_PER_CLASS].index)]
 
 
-def training_rows(df, with_pseudo=False, corrected=True, quiet=False):
+def training_rows(df, with_pseudo=False, corrected=True, quiet=False, arm=None,
+                  with_ham=True):
     """(ids, labels, provenance) for every row that carries a usable type.
 
     Corrections are applied *before* the `other` exclusion, which is the whole point:
@@ -124,6 +192,11 @@ def training_rows(df, with_pseudo=False, corrected=True, quiet=False):
         frame = pd.concat([frame, pd.DataFrame({"id": ps["id"], "type": ps["type"],
                                                 "src": "pseudo"})], ignore_index=True)
 
+    if with_ham and arm:
+        ids = hardest_ham(df, arm, quiet=quiet)
+        frame = pd.concat([frame, pd.DataFrame({"id": ids, "type": NOT_SCAM,
+                                                "src": "ham"})], ignore_index=True)
+
     return usable(frame, quiet)
 
 
@@ -142,20 +215,21 @@ def _fit(Xtr, ytr, seed):
 
 def _rows_to_X(df, arm, frame):
     """The stage-1 representation for `frame`, from the same cache the app uses."""
-    X_all, names = R.feature_matrix(arm, df, df["id"].to_numpy())
+    X_all, names = stage1_matrix(df, arm)
     pos = {int(i): k for k, i in enumerate(df["id"].to_numpy())}
     return X_all[[pos[int(i)] for i in frame["id"]]], names
 
 
-def train(arm, with_pseudo=False, seed=M.SEED, corrected=True):
+def train(arm, with_pseudo=False, seed=M.SEED, corrected=True, with_ham=True):
     from sklearn.model_selection import train_test_split
     from sklearn.metrics import classification_report, confusion_matrix
 
     df = M.load()
-    frame = training_rows(df, with_pseudo, corrected)
+    frame = training_rows(df, with_pseudo, corrected, arm=arm, with_ham=with_ham)
     print(f"\n{len(frame)} labelled rows over {frame['type'].nunique()} types "
           f"({(frame['src'] == 'pseudo').sum()} pseudo, "
-          f"{(frame['src'] == 'corrected').sum()} corrected)")
+          f"{(frame['src'] == 'corrected').sum()} corrected, "
+          f"{(frame['src'] == 'ham').sum()} ham)")
     print(frame["type"].value_counts().to_string())
 
     # Same representation as stage 1, from the same cache -- the app computes this
@@ -199,7 +273,7 @@ def _held_out(df, arm, seed):
     """The exact test split train() uses, so nothing is scored on its own fit."""
     from sklearn.model_selection import train_test_split
 
-    frame = training_rows(df, quiet=True)
+    frame = training_rows(df, quiet=True, arm=arm)
     tr, te = train_test_split(frame, test_size=0.25, random_state=seed,
                               stratify=frame["type"])
     return tr, te
@@ -230,6 +304,9 @@ def vs_teacher(arm, seed=M.SEED):
     print(f"teacher rows {len(ev)}, joined to the corpus by text: {joined}")
 
     truth = dict(zip(te["id"], te["type"]))
+    # The teacher was never offered "not a scam", so rows of that class would score it
+    # wrong for a question it was not asked.
+    truth = {i: t for i, t in truth.items() if t != NOT_SCAM}
     ev = ev[ev["id"].isin(truth)].copy()
     if ev.empty:
         raise SystemExit("no teacher rows fall in the held-out split")
@@ -259,6 +336,38 @@ def vs_teacher(arm, seed=M.SEED):
               f"   answered outside the 8: {outside}")
 
 
+def with_without_ham(arm, seed=M.SEED):
+    """What adding `not a scam` costs the real scam types.
+
+    A new class can only take probability mass from the others, and the risk that
+    matters is a genuine scam being labelled `not a scam` -- that suppresses a useful
+    type on a message the user does need warning about. Both heads are scored on the
+    same scam rows, so the ham class shows up as a cost rather than as free accuracy
+    from an easy extra class.
+    """
+    from sklearn.model_selection import train_test_split
+
+    df = M.load()
+    withham = training_rows(df, arm=arm, with_ham=True)
+    tr, te = train_test_split(withham, test_size=0.25, random_state=seed,
+                              stratify=withham["type"])
+
+    scam_te = te[te["type"] != NOT_SCAM]
+    Xs, _ = _rows_to_X(df, arm, scam_te)
+    ys = scam_te["type"].to_numpy()
+    print(f"\nscored on {len(scam_te)} held-out scam rows (the ham rows are excluded, "
+          f"so this is\nthe cost side of the trade only)\n")
+
+    for label, frame in [("without ham", tr[tr["type"] != NOT_SCAM]), ("with ham", tr)]:
+        X, _ = _rows_to_X(df, arm, frame)
+        clf = _fit(X, frame["type"].to_numpy(), seed)
+        pred = clf.predict(Xs)
+        acc = (pred == ys).mean()
+        stolen = int((pred == NOT_SCAM).sum())
+        print(f"  {label:<12} accuracy on scam types {acc:.3f}"
+              f"   genuine scams called '{NOT_SCAM}': {stolen}/{len(ys)}")
+
+
 def compare(arm, seed=M.SEED):
     """Corrected labels against the mapping, scored on the same held-out rows.
 
@@ -271,8 +380,8 @@ def compare(arm, seed=M.SEED):
     from sklearn.metrics import classification_report
 
     df = M.load()
-    new = training_rows(df, corrected=True)
-    prior = training_rows(df, corrected=False, quiet=True)
+    new = training_rows(df, corrected=True, arm=arm)
+    prior = training_rows(df, corrected=False, quiet=True, arm=arm)
     old = dict(zip(prior["id"].astype(str), prior["type"]))
 
     tr, te = train_test_split(new, test_size=0.25, random_state=seed,
@@ -350,6 +459,10 @@ def main():
                     help="corrected labels vs the mapping on the same held-out rows")
     ap.add_argument("--vs-teacher", action="store_true",
                     help="the 3B teacher vs the head, same rows and same labels")
+    ap.add_argument("--no-ham", action="store_true",
+                    help=f"train without the '{NOT_SCAM}' class")
+    ap.add_argument("--ham-cost", action="store_true",
+                    help=f"what '{NOT_SCAM}' costs the real scam types")
     ap.add_argument("--limit", type=int, default=4000)
     ap.add_argument("--batch-size", type=int, default=0)
     a = ap.parse_args()
@@ -360,10 +473,13 @@ def main():
         compare(a.arm)
     if a.vs_teacher:
         vs_teacher(a.arm)
+    if a.ham_cost:
+        with_without_ham(a.arm)
     if a.train:
-        train(a.arm, a.with_pseudo, corrected=not a.no_corrections)
-    if not (a.train or a.pseudo_label or a.compare or a.vs_teacher):
-        ap.error("pass --train, --compare, --vs-teacher or --pseudo-label")
+        train(a.arm, a.with_pseudo, corrected=not a.no_corrections,
+              with_ham=not a.no_ham)
+    if not (a.train or a.pseudo_label or a.compare or a.vs_teacher or a.ham_cost):
+        ap.error("pass --train, --compare, --vs-teacher, --ham-cost or --pseudo-label")
 
 
 if __name__ == "__main__":

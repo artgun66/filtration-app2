@@ -37,7 +37,10 @@ GEN = CFG["generation"]
 # The guide names each type, so a rename in scam_types.yaml propagates here.
 _TYPE_NAMES = dict(zip(
     ["GOVERNMENT", "TECH_SUPPORT", "BANK", "DELIVERY", "FAMILY", "ROMANCE", "CRYPTO",
-     "PRIZE", "CHARITY", "HEALTH", "UTILITY", "JOB", "OTHER"], ST.SCAM_TYPES))
+     "PRIZE", "CHARITY", "HEALTH", "UTILITY", "JOB", "OTHER", "NOT_SCAM"],
+    ST.SCAM_TYPES))
+assert len(_TYPE_NAMES) == len(ST.SCAM_TYPES), (
+    "one placeholder per type, in the same order as scam_types.yaml")
 TYPE_GUIDE = CFG["type_guide"].format(**_TYPE_NAMES).rstrip()
 
 SYSTEM = CFG["json_system"].format()      # unescapes the doubled braces in the schema
@@ -149,7 +152,7 @@ def classify_choice(tok, model, messages, batch_size=GEN["batch_size"]):
 
     One forward pass per batch, no decode loop: the answer is an argmax over the 13
     option-letter logits at the final position, so the output is always a member of
-    SCAM_TYPES. Confidence is that softmax restricted to the 13 letters.
+    SCAM_TYPES. Confidence is that softmax restricted to the option letters.
     """
     import torch
 

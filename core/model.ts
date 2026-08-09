@@ -27,6 +27,8 @@ export type Manifest = {
   type_classes: string[] | null;
   type_min_conf: number;
   types_not_covered: string[];
+  /** The type-head class meaning "stage 1 was wrong", named rather than hardcoded. */
+  type_not_scam?: string;
 };
 
 export type Verdict = {
@@ -35,6 +37,15 @@ export type Verdict = {
   /** The scam type, or null when the head is unsure or the message looks safe. */
   type: string | null;
   typeProb: number | null;
+  /**
+   * The type head thinks this is a false positive.
+   *
+   * It does NOT overturn `scam`. Stage 1 is the far better-validated model -- AUC
+   * 0.996 against this head's 0.83 -- and overturning it would trade a confident
+   * false alarm for a silent miss, which is the wrong direction for this audience.
+   * Treat it as a second opinion worth showing, not as a verdict.
+   */
+  falseAlarm: boolean;
   /** Plain-English descriptions of the engineered features that fired. */
   signals: string[];
 };
@@ -152,8 +163,9 @@ export class Scanner {
 
     let type: string | null = null;
     let typeProb: number | null = null;
-    // Only name a type for something already judged suspicious: the head never saw a
-    // safe message, so its answer on one is meaningless.
+    let falseAlarm = false;
+    // Only consult the type head for something already judged suspicious: it is
+    // trained on flagged messages, so its answer on an unflagged one means nothing.
     if (scam && this.typeHead && this.manifest.type_classes) {
       const t = await this.typeHead.run({ input });
       const p = t.probabilities.data;
@@ -162,10 +174,22 @@ export class Scanner {
       typeProb = p[best];
       // Below the floor, say nothing. Four of the thirteen types have no training
       // rows at all, so a confident-looking guess would often be one of those.
-      type = typeProb >= this.manifest.type_min_conf
+      const named = typeProb >= this.manifest.type_min_conf
         ? this.manifest.type_classes[best] : null;
+
+      // "not a scam" is a class of this head, not a kind of scam. Rendering it as one
+      // would put "This looks like a scam - not a scam" on screen, so it leaves here
+      // as a separate flag and `type` stays null.
+      if (named !== null && named === this.manifest.type_not_scam) {
+        falseAlarm = true;
+      } else {
+        type = named;
+      }
     }
 
-    return { scam, prob, type, typeProb, signals: firedSignals(feats, this.manifest.feature_labels) };
+    return {
+      scam, prob, type, typeProb, falseAlarm,
+      signals: firedSignals(feats, this.manifest.feature_labels),
+    };
   }
 }

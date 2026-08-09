@@ -16,6 +16,13 @@ scam_types:
   - utility shutoff
   - job offer
   - other
+  # Not a scam type -- the answer for when stage 1 was wrong. Stage 2 only ever runs on
+  # messages stage 1 has already flagged, so without this option a false positive has
+  # to be forced into some scam category, and the app names a kind of scam for a
+  # message that is not one. Its training rows are ham, not SmishTank rows, so no
+  # category_map or brand entry produces it. Keep it LAST: scam_type_prompt.py zips
+  # this list positionally against its placeholder names and its letter menu.
+  - not a scam
 
 # Types SmishTank cannot supply. Measured by running scam_types.py, not guessed:
 # these come out at 0 rows, so stage 2 cannot be scored on them until hand-labelled.

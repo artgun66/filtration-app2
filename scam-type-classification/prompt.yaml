@@ -79,6 +79,15 @@ type_guide: |-
     you never applied for.
     e.g. "We reviewed your resume. $35/hr remote data entry, start today. Text YES."
   - {OTHER}: a suspicious message that does not fit any type above.
+  - {NOT_SCAM}: the earlier filter was wrong and this is ordinary legitimate traffic --
+    a real delivery notice from a courier the person uses, a genuine appointment
+    reminder, a marketing message from a company they signed up to, or normal personal
+    conversation. Choose this ONLY when nothing in the message is trying to get money,
+    credentials or a reply under false pretences. A friendly opener from a stranger is
+    {ROMANCE}, not this: it looks harmless precisely because the ask has not arrived
+    yet. When torn between this and a scam type, pick the scam type.
+    e.g. "Your prescription is ready for collection at the Boots on High Street."
+    e.g. "Reminder: dentist Tues 3pm. Reply R to reschedule."
 
 # --- method: choice (default) -------------------------------------------------
 # Letting the model write the category out in full does not work at this size. On the
@@ -87,16 +96,25 @@ type_guide: |-
 # bill" for a photo-gallery lure). Identical at batch 1 and batch 8, so it is the
 # model, not padding. Scoring the taxonomy instead of generating it removes the
 # failure by construction: one forward pass, argmax over the 13 option letters.
-choice_letters: ABCDEFGHIJKLM
+choice_letters: ABCDEFGHIJKLMN
 
 choice_system: |-
   You classify suspicious SMS messages for an app that protects older adults.
 
   Every message you are given has ALREADY been flagged as suspicious by an earlier
-  filter. Do not re-judge whether it is a scam -- decide which KIND of scam it is. A
-  message that reads as harmless small talk is not "other": scams that open with a
-  friendly stranger, a wrong number or a golf/dinner memory are the first move of a
-  romance scam, and the ask comes in a later message you cannot see.
+  filter. Your job is to decide which KIND of scam it is. That filter is usually right,
+  so start from the assumption that it is, and pick the scam type that fits.
+
+  It is occasionally wrong, which is what "not a scam" is for -- but that option is a
+  last resort, not a tie-breaker. Use it only for messages that are plainly ordinary:
+  a real appointment reminder, a delivery notice for a parcel the person is expecting,
+  marketing from a company they signed up to. Missing a scam costs far more than
+  mislabelling its type, so when you are torn, choose the scam type.
+
+  A message that reads as harmless small talk is NOT "not a scam" and is NOT "other":
+  scams that open with a friendly stranger, a wrong number or a golf/dinner memory are
+  the first move of a romance scam, and the ask comes in a later message you cannot
+  see. Harmlessness is the technique.
 
   Answer with the single letter of the best category and nothing else.
 
@@ -123,6 +141,9 @@ explain_user: |-
   plain-English sentence an older adult could act on. Never tell the user to click a
   link or reply to the sender.
 
+  If the category is "not a scam", there are no warning signs to list: return an empty
+  list and one sentence saying why the message looks like ordinary legitimate traffic.
+
   Reply with a single JSON object and nothing else:
   {{"warning_signs": [<short phrases, 1 to 4 of them>],
    "explanation": <one sentence, under 25 words>}}
@@ -132,11 +153,14 @@ json_system: |-
   You classify suspicious SMS messages for an app that protects older adults.
 
   Every message you are given has ALREADY been flagged as suspicious by an earlier
-  filter. Do not re-judge whether it is a scam -- decide which KIND of scam it is. A
-  message that reads as harmless small talk is not "other": scams that open with a
-  friendly stranger, a wrong number or a golf/dinner memory are the first move of a
-  romance scam, and the ask comes in a later message you cannot see. Only use "other"
-  when the message genuinely fits none of the categories.
+  filter. Your job is to decide which KIND of scam it is, starting from the assumption
+  that the filter was right. "not a scam" exists because it occasionally is not, but it
+  is a last resort for plainly ordinary messages, not a tie-breaker -- missing a scam
+  costs far more than mislabelling its type. A message that reads as harmless small
+  talk is neither "not a scam" nor "other": scams that open with a friendly stranger, a
+  wrong number or a golf/dinner memory are the first move of a romance scam, and the
+  ask comes in a later message you cannot see. Only use "other" when the message is
+  clearly suspicious but fits none of the categories.
 
   Given one message, identify which scam category it belongs to, list the concrete
   warning signs visible in the text, and write one short plain-English sentence an older

@@ -25,7 +25,14 @@ THIN = _CFG["thin"]
 
 # Named constants, so the stage-2 prompt can refer to a type without retyping it.
 (GOVERNMENT, TECH_SUPPORT, BANK, DELIVERY, FAMILY, ROMANCE, CRYPTO,
- PRIZE, CHARITY, HEALTH, UTILITY, JOB, OTHER) = SCAM_TYPES
+ PRIZE, CHARITY, HEALTH, UTILITY, JOB, OTHER, NOT_SCAM) = SCAM_TYPES
+
+# NOT_SCAM is the answer for a stage-1 false positive, not a kind of scam, so nothing
+# in this module ever returns it: no SmishTank category or brand maps to it, and its
+# training rows are ham. It exists in the taxonomy because stage 2 only ever sees
+# already-flagged messages and needs a way to say the flag was wrong.
+# app-backend/distill.py builds the class; scam_type_for below cannot produce it.
+SCAM_ONLY_TYPES = [t for t in SCAM_TYPES if t != NOT_SCAM]
 
 _NON_ALNUM = re.compile(r"[^a-z0-9]+")
 
@@ -71,8 +78,11 @@ if __name__ == "__main__":
         counts[scam_type_for(row.get("Message Categories"), row.get("Brand"))] += 1
 
     print(f"{sum(counts.values()):,} rows mapped\n")
-    for t in SCAM_TYPES:
+    for t in SCAM_ONLY_TYPES:
         flag = "   <- no examples, hand-label needed" if counts[t] == 0 else ""
         print(f"  {t:<28} {counts[t]:>5,}{flag}")
+    # Not listed above: it has no SmishTank rows by construction, so a zero here would
+    # read as a gap to hand-label rather than as the design.
+    print(f"\n  {NOT_SCAM:<28} {'--':>5}   ham rows, built by app-backend/distill.py")
     if counts[""]:
         print(f"  {'(uncategorised)':<28} {counts['']:>5,}")

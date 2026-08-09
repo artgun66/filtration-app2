@@ -10,7 +10,7 @@ import * as ort from 'onnxruntime-web/wasm';
 
 import { Scanner, type OrtLike, type Verdict } from '../../core/model.ts';
 import { loadVocab } from '../../core/tokenizer.ts';
-import { loadBundle, alreadyCached } from './assets.ts';
+import { loadBundle, storageState } from './assets.ts';
 import { resultCard, progressPanel, errorPanel, installHint } from './ui.ts';
 import './styles.css';
 
@@ -37,15 +37,25 @@ function show(node: HTMLElement | null): void {
 }
 
 async function boot(): Promise<Scanner> {
-  const cached = await alreadyCached();
-  const panel = progressPanel();
+  const state = await storageState();
+  const panel = progressPanel(state);
   show(panel.node);
-  if (!cached) {
-    button.disabled = true;
-    input.disabled = true;
-  }
 
+  // Only lock the form for the first-run download. On a repeat visit the models are
+  // already on the device and the remaining wait is reading 86 MB off disk into the
+  // runtime -- a few seconds where someone could perfectly well be pasting their
+  // message. `scan` awaits `ready` anyway, so an early submit just resolves when the
+  // sessions do. Blocking here would make a working cache feel like a slow one.
+  const blocking = state !== 'stored';
+  button.disabled = blocking;
+  input.disabled = blocking;
+
+  // Logged rather than shown: if a repeat visit is slow, this says in one line whether
+  // the bytes came from disk or the network, which is the only thing worth knowing.
+  const t0 = performance.now();
   const bundle = await loadBundle(panel.update);
+  console.info(`[cyber-scout] storage=${state}, models ready in ` +
+               `${((performance.now() - t0) / 1000).toFixed(1)}s`);
   const scanner = await Scanner.create({
     ort: ort as unknown as OrtLike,
     resolve: bundle.resolve,
@@ -56,7 +66,9 @@ async function boot(): Promise<Scanner> {
 
   button.disabled = false;
   input.disabled = false;
-  show(installHint());
+  // Clear the loading card, unless the user is already reading a verdict they asked
+  // for while it was still starting up.
+  if (app.firstElementChild === panel.node) show(installHint());
   return scanner;
 }
 
