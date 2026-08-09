@@ -55,18 +55,40 @@ type_guide: |-
     courier (USPS, UPS, FedEx, DHL) belongs here, not under utilities.
     e.g. "USPS: your package is held, $0.35 customs fee due: usps-redeliver.icu"
     e.g. "DHL: an outstanding import charge of $2.99 is blocking your shipment."
-  - {FAMILY}: pretends to be a relative in trouble and needing money now.
+  - {FAMILY}: a person claiming to be a relative or close friend, in trouble, needing
+    money or a reply now. There must be a *person* -- corporate bad-news phrasing like
+    "we regret to inform you that your membership is on hold" is a company writing to a
+    customer, not a family member, and belongs with whatever service it names.
     e.g. "Grandma it's me, I'm in jail and can't talk. Please send bail money."
-  - {ROMANCE}: a stranger opening a conversation -- a wrong number, a misremembered
-    name, "long time no see", a shared meal or golf game that never happened. There is
-    usually NO link, NO money request and nothing threatening in this first message;
-    that is what makes it this category rather than "other".
+    e.g. "Mum, my phone broke, this is my new number. Can you message me here?"
+  - {ROMANCE}: a stranger opening a **person-to-person** conversation -- a wrong number,
+    a misremembered name, "long time no see", a shared meal or golf game that never
+    happened. There is usually NO link, NO money request and nothing threatening in
+    this first message; that is what makes it this category rather than "other".
+    NOT romance: anything that names a company, an account, a subscription, a bill, a
+    parcel or a login, however garbled or misspelt the text is. A mangled Netflix or
+    Amazon billing notice is {TECH_SUPPORT}, not a friendly stranger. Judge by who the
+    message claims to be from, never by how broken the writing looks.
     e.g. "Hi! Is this still Amy's number? I'm Lisa, we met at the yoga retreat :)"
     e.g. "Hey Tom, ages since we caught up -- it's Mei. How have you been?"
-  - {CRYPTO}: promises trading profits, crypto giveaways or an investment tip.
+  - {CRYPTO}: trading, investing or coins specifically -- a signal or "analysis" group,
+    a mining platform, a giveaway of coin, a promise of daily returns. Usually an
+    invitation to join a WhatsApp or Telegram group.
+    NOT crypto merely because money is mentioned. A tax refund or stimulus payment is
+    {GOVERNMENT}; a card, transfer or billpay problem is {BANK}; an unexpected refund
+    or rebate is {PRIZE}; an insurance offer is {HEALTH}. This category is about
+    *investing*, not about amounts of money.
     e.g. "BTC signal group: our members made 340% last week. Join free."
-  - {PRIZE}: says you have won something, or are selected for a reward or gift card.
+    e.g. "Dear. You are invited to join the (Bitcoin) internal discussion group."
+    e.g. "Cloud mining platform: register and get $100 free, credited in seconds."
+  - {PRIZE}: says you have won something, or are selected for a reward or gift card --
+    and also any UNSOLICITED refund, rebate or "we owe you" message, which uses the
+    same free-money hook and has no better home in this taxonomy.
+    "Claim" language does not make it {DELIVERY}: a prize is claimed too. Only an
+    actual parcel, courier or tracking number makes it {DELIVERY}.
     e.g. "CONGRATS! You have been selected for a $500 Costco gift card. Claim here."
+    e.g. "The iPad Pro you won was not yet claimed! Claim it here, 12h left."
+    e.g. "We possibly owe you as much as $654.57 -- your savings is ready."
   - {CHARITY}: asks for a donation, often tied to a disaster or a veterans' cause.
     e.g. "Help the hurricane relief fund - any amount helps. Donate: give-relief.xyz"
   - {HEALTH}: Medicare, insurance, prescriptions, braces, test kits or medical
@@ -115,6 +137,12 @@ choice_system: |-
   scams that open with a friendly stranger, a wrong number or a golf/dinner memory are
   the first move of a romance scam, and the ask comes in a later message you cannot
   see. Harmlessness is the technique.
+
+  That cuts one way only. "Romance" is for a person writing to a person. Many of these
+  messages are deliberately misspelt or mangled to slip past filters -- "NFLXID#",
+  "AM/AZON", "your-biIls" -- and a broken-looking billing notice is still a billing
+  notice. Decide from WHO the message claims to be (a brand, an agency, a courier, a
+  bank, a stranger) rather than from how the text reads.
 
   Answer with the single letter of the best category and nothing else.
 
