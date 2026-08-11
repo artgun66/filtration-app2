@@ -8,6 +8,7 @@
  */
 import type { Verdict } from '../../core/model.ts';
 import type { StorageState } from './assets.ts';
+import type { LlmVerdict } from './llm.ts';
 import {
   confidenceWord, HEADLINE, UNKNOWN_TYPE, SCAM_ADVICE, FALSE_ALARM, signalsHeading,
 } from '../../core/copy.ts';
@@ -114,6 +115,41 @@ export function progressPanel(state: StorageState): {
                         `${(t / 1024 / 1024).toFixed(0)} MB`;
     },
   };
+}
+
+/**
+ * The 3B teacher's answer, shown beside the on-device one for comparison.
+ *
+ * Visually separated from the verdict card on purpose. This is a research view, the
+ * two models disagree often, and a user should never be left unsure which answer the
+ * app actually stands behind.
+ */
+export function llmCard(v: LlmVerdict | null, pending = false): HTMLElement {
+  const card = el('section', 'card llm');
+  card.append(el('h2', 'llm-title', 'Research view — 3B language model'));
+
+  if (pending) {
+    card.append(el('p', 'note', 'Asking the language model…'));
+    return card;
+  }
+  if (!v) {
+    card.append(el('p', 'note',
+      'Not available. Start it with: python serve_llm.py'));
+    return card;
+  }
+
+  card.append(el('p', 'confidence', `${v.type}  ·  ${(v.confidence * 100).toFixed(0)}%`));
+  if (v.explanation) card.append(el('p', 'note', v.explanation));
+  if (v.warning_signs.length) {
+    card.append(bulletList(v.warning_signs, 'Warning signs it listed'));
+  }
+  const foot = el('p', 'llm-foot',
+    `${v.model} · ${v.seconds.toFixed(1)}s` +
+    (v.left_the_device
+      ? ' · this message was sent to the machine running the model, not checked on your device'
+      : ''));
+  card.append(foot);
+  return card;
 }
 
 export function errorPanel(err: unknown): HTMLElement {

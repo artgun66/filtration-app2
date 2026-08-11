@@ -11,7 +11,8 @@ import * as ort from 'onnxruntime-web/wasm';
 import { Scanner, type OrtLike, type Verdict } from '../../core/model.ts';
 import { loadVocab } from '../../core/tokenizer.ts';
 import { loadBundle, storageState } from './assets.ts';
-import { resultCard, progressPanel, errorPanel, installHint } from './ui.ts';
+import { resultCard, progressPanel, errorPanel, installHint, llmCard } from './ui.ts';
+import { llmEnabled, llmReady, llmClassify } from './llm.ts';
 import './styles.css';
 
 // env.wasm.wasmPaths is deliberately NOT set. onnxruntime-web reaches its runtime two
@@ -89,6 +90,16 @@ form.addEventListener('submit', async (ev) => {
     const scanner = await ready;
     const verdict: Verdict = await scanner.scan(text);
     show(resultCard(verdict));
+
+    // The on-device verdict is already on screen before this starts. The teacher takes
+    // seconds and may not be running at all, so it is never allowed to delay or block
+    // the answer the app actually stands behind.
+    if (llmEnabled && await llmReady()) {
+      const pending = llmCard(null, true);
+      app.append(pending);
+      const v = await llmClassify(text);
+      pending.replaceWith(llmCard(v));
+    }
   } catch (err) {
     console.error(err);
     show(errorPanel(err));

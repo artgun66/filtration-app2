@@ -9,6 +9,7 @@ Edit the corpus, not these.
 
     python split_views.py                # val and test
     python split_views.py --all          # including train (68,302 rows)
+    python split_views.py --combined     # one file, every row, split as a column
 """
 import argparse
 import os
@@ -25,7 +26,7 @@ COLS = ["id", "split", "label", "scam", "model_pred",
         "scam_type", "scam_type_true", "scam_type_pred", "source", "text"]
 
 
-def main(all_splits=False):
+def main(all_splits=False, combined=False):
     df = pd.read_csv(SRC, keep_default_na=False, dtype=str)
     missing = [c for c in COLS if c not in df.columns]
     if missing:
@@ -33,6 +34,16 @@ def main(all_splits=False):
                          f"python ../scam-classification/annotate.py --types")
 
     os.makedirs(OUT, exist_ok=True)
+
+    if combined:
+        # Every row in one file, `split` telling them apart -- the same information as
+        # the corpus itself, minus the 94 columns that make it unreadable.
+        path = os.path.join(OUT, "all.csv")
+        df[COLS].to_csv(path, index=False)
+        print(f"{'all':<6} {len(df):>6} rows  ->  views/all.csv")
+        print(df["split"].value_counts().to_string())
+        return
+
     wanted = ["train", "val", "test"] if all_splits else ["val", "test"]
     for s in wanted:
         part = df[df["split"] == s][COLS]
@@ -50,4 +61,6 @@ if __name__ == "__main__":
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--all", dest="all_splits", action="store_true",
                    help="also write train.csv")
+    p.add_argument("--combined", action="store_true",
+                   help="one file with every row, split as a column")
     main(**vars(p.parse_args()))

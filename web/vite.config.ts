@@ -50,6 +50,11 @@ export default defineConfig({
   server: {
     // Vite only serves files under the project root; core/ is a sibling.
     fs: { allow: ['..'] },
+    // Vite rejects Host headers it does not recognise, which is what stops a public
+    // tunnel dead with a 403 -- the protection is against DNS rebinding and is right
+    // to be on by default. A leading dot matches subdomains, so this permits a
+    // throwaway Cloudflare quick tunnel without opening the dev server to any host.
+    allowedHosts: ['.trycloudflare.com', '.ngrok-free.app', '.ngrok.io'],
   },
   build: {
     // The 86 MB encoder lives in public/ and is copied verbatim, so warning about it

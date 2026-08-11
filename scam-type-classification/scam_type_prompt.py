@@ -7,8 +7,13 @@ Qwen2.5-3B-Instruct in fp16 is ~6.2 GB and will not fit alongside anything else 
 6 GB card, so this loads it 4-bit (bitsandbytes NF4, ~2 GB) and runs as a separate pass
 after the embedding cache is built.
 
+  python scam_type_prompt.py --text "IRS: refund pending, confirm at x.co/a"
   python scam_type_prompt.py --limit 20        # eyeball the output
   python scam_type_prompt.py --evaluate        # score against the mapped labels
+
+`--text` is the fast loop for editing prompt.yaml: one message, one answer, seconds
+instead of the ~50 minutes a full evaluation costs. It reads the same prompts, guide
+and letter menu the evaluation does, so what it shows the model is what the model gets.
 
 The model is asked for JSON. transformers has no grammar constraint, so output is
 parsed tolerantly, retried once with a repair instruction, and the parse-failure rate
@@ -218,10 +223,29 @@ def main():
                     help="score against the dataset's scam_type column")
     ap.add_argument("--fp16", action="store_true", help="skip 4-bit (needs >6 GB free)")
     ap.add_argument("--method", choices=["choice", "json"], default="choice",
-                    help="choice: argmax over the 13 options (default). "
+                    help="choice: argmax over the option letters (default). "
                          "json: free-generate the whole object -- kept for comparison, "
                          "it collapses onto one category, see classify_choice")
+    ap.add_argument("--text", action="append", metavar="MSG",
+                    help="classify this message instead of sampling the corpus; "
+                         "repeatable. For trying a prompt edit in seconds rather "
+                         "than re-running the ~50 min evaluation.")
     a = ap.parse_args()
+
+    # One-off messages: the whole point is a fast loop while editing prompt.yaml, so
+    # this skips the corpus entirely and prints the full menu the model was shown.
+    if a.text:
+        print(f"loading {MODEL} ({'fp16' if a.fp16 else '4-bit nf4'})...")
+        tok, model = load_model(four_bit=not a.fp16)
+        picked = classify_choice(tok, model, a.text, a.batch_size)
+        detail = explain(tok, model, a.text, [t for t, _ in picked], a.batch_size)
+        for msg, (t, c), d in zip(a.text, picked, detail):
+            print("-" * 70)
+            print("MSG :", msg[:300])
+            print(f"TYPE: {t}   (p={c:.2f})")
+            if d:
+                print("     ", json.dumps(d, ensure_ascii=False))
+        return
 
     df = pd.read_csv(DATASET_CSV, keep_default_na=False, dtype={"text": str})
     labelled = df[df["scam_type"] != ""]

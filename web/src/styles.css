@@ -114,6 +114,24 @@ button:disabled { background: var(--muted); cursor: default; }
   transition: width 0.2s linear;
 }
 
+/* The research view. Deliberately plainer than the verdict card -- it must not read
+   as a second opinion the app endorses. */
+.card.llm {
+  background: var(--card);
+  border-style: dashed;
+  border-color: var(--muted);
+  color: var(--text);
+}
+.llm-title {
+  font-size: var(--small);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin: 0;
+}
+.llm-foot { font-size: 13px; color: var(--muted); margin: 0; line-height: 20px; }
+
 .hint {
   padding: var(--pad);
   border: 2px dashed var(--safe-accent);
