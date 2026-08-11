@@ -23,6 +23,10 @@ app/dist/
 web/dist/
 web/public/models/
 
+# Readable per-split slices of the corpus, for looking at by eye. Views, not data --
+# `python dataset/split_views.py` rebuilds them in seconds.
+dataset/views/
+
 # Python
 __pycache__/
 *.py[cod]
